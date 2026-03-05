@@ -8,7 +8,7 @@ interface NavBarProps {
 
 export function NavBar({ items, activeSection }: NavBarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const headerLogoSrc = `${import.meta.env.BASE_URL}images/Builders%20SP%20Claude%20Code%20Logo.png`;
+  const headerLogoSrc = `${import.meta.env.BASE_URL}images/Builders%20SP%20Claude%20Code%20com%20BG.png`;
 
   useEffect(() => {
     setIsOpen(false);
