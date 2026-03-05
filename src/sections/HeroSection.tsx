@@ -1,5 +1,5 @@
 export function HeroSection() {
-  const heroImageSrc = `${import.meta.env.BASE_URL}images/Claude%20Code.png`;
+  const heroImageSrc = `${import.meta.env.BASE_URL}images/Builders%20SP%20Claude%20Code%20com%20BG.png`;
 
   return (
     <section className="hero">
