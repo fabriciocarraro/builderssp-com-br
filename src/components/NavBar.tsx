@@ -18,9 +18,9 @@ export function NavBar({ items, activeSection }: NavBarProps) {
     <header className="site-header">
       <div className="shell header-shell">
         <a className="brand" href="#top" aria-label="Voltar para o topo">
-          <img className="brand-logo" src={headerLogoSrc} alt="Logo Claude Code SP" />
+          <img className="brand-logo" src={headerLogoSrc} alt="Logo Builders SP: Claude Code" />
           <span className="brand-text">
-            <strong>Claude Code SP</strong>
+            <strong>Builders SP: Claude Code</strong>
           </span>
         </a>
 

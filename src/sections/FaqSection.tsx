@@ -9,7 +9,7 @@ export function FaqSection() {
         <SectionHeader
           eyebrow="FAQ"
           title="Perguntas frequentes"
-          description="Dúvidas comuns sobre inscrição, formato e participação nos encontros do Claude Code SP."
+          description="Dúvidas comuns sobre inscrição, formato e participação nos encontros do Builders SP: Claude Code."
         />
         <div className="faq-grid">
           {faqItems.map((item, index) => (

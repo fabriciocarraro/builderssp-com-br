@@ -6,7 +6,7 @@ export function HeroSection() {
       <div className="shell hero-grid">
         <div className="hero-copy reveal">
           <p className="eyebrow">Comunidade de builders em São Paulo</p>
-          <h1>Claude Code SP</h1>
+          <h1>Builders SP: Claude Code</h1>
           <p className="hero-lead">
             O maior evento para pessoas que constroem projetos, protótipos e
             soluções reais usando Claude Code da Anthropic.

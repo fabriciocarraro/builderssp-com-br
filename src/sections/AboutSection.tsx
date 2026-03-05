@@ -26,7 +26,7 @@ export function AboutSection() {
         <SectionHeader
           eyebrow="Sobre"
           title="Um ponto de encontro para construir com qualidade"
-          description="Claude Code SP organiza encontros recorrentes para quem quer transformar experimentação em produtos e protótipos consistentes."
+          description="Builders SP: Claude Code organiza encontros recorrentes para quem quer transformar experimentação em produtos e protótipos consistentes."
         />
         <div className="feature-grid">
           {pillars.map((pillar, index) => (

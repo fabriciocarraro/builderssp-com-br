@@ -7,7 +7,7 @@ export function PhotosSection() {
         <SectionHeader
           eyebrow="Fotos"
           title="Galeria em breve"
-          description="Os primeiros encontros do Claude Code SP ainda vão acontecer. Depois de cada edição, esta área vai receber os registros da comunidade."
+          description="Os primeiros encontros do Builders SP: Claude Code ainda vão acontecer. Depois de cada edição, esta área vai receber os registros da comunidade."
         />
         <div className="photo-placeholder reveal">
           <p>Nenhuma foto publicada ainda.</p>
