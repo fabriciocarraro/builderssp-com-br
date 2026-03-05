@@ -8,7 +8,7 @@ export function HeroSection() {
           <p className="eyebrow">Comunidade de builders em São Paulo</p>
           <h1>Builders SP:<br />Claude Code</h1>
           <p className="hero-lead">
-            O maior evento para pessoas que constroem projetos, produtos
+            A maior comunidade para pessoas que constroem projetos, produtos
             e soluções reais usando ferramentas modernas de Inteligência Artificial.
           </p>
           <div className="hero-actions">
