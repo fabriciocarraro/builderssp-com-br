@@ -1,4 +1,3 @@
-import { communityEmail } from "../data/site";
 import { type NavItem } from "../types/content";
 
 interface SiteFooterProps {
@@ -33,16 +32,13 @@ export function SiteFooter({ items }: SiteFooterProps) {
                 <a href={`#${item.id}`}>{item.label}</a>
               </li>
             ))}
-            <li>
-              <a href={whatsappGroupUrl} target="_blank" rel="noreferrer">
-                Entrar no grupo de Whatsapp
-              </a>
-            </li>
           </ul>
         </div>
         <div>
           <p className="footer-title">Contato</p>
-          <a href={`mailto:${communityEmail}`}>{communityEmail}</a>
+          <a href={whatsappGroupUrl} target="_blank" rel="noreferrer">
+            Entrar no grupo de Whatsapp
+          </a>
           <p>São Paulo, Brasil</p>
         </div>
       </div>

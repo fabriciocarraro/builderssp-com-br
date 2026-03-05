@@ -23,7 +23,7 @@ export function HeroSection() {
               QUero ser speaker
             </a>
             <a
-              className="btn btn-ghost"
+              className="btn btn-primary"
               href="https://chat.whatsapp.com/EfVfBSX78VP15KtSkNMbgm?mode=gi_t"
               target="_blank"
               rel="noreferrer"
