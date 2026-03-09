@@ -12,4 +12,4 @@ Landing page oficial do Builders SP, feita com React + Vite.
 ## Deploy
 
 - O deploy esta configurado em `.github/workflows/deploy.yml`
-- O `base` do Vite esta em `/claudecodesp-com-br/` para GitHub Pages.
+- O `base` do Vite esta em `/` (site em dominio customizado no GitHub Pages).
