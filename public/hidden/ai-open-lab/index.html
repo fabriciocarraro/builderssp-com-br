@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+    <title>The AI Open Lab — Public AI Resources</title>
+    <meta name="description" content="Open models, datasets, benchmarks and resources developed in public research centers — for ethical, transparent, and accessible AI." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/styles.css" />
+    <script defer src="assets/app.js"></script>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <header class="site-header" id="site-header">
+      <div class="container header-inner">
+        <a href="#home" class="logo">
+          <span class="logo-icon">&#9670;</span>
+          The AI Open Lab
+        </a>
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="main-nav" id="main-nav">
+          <a href="#home" class="nav-link active" data-page="home">Home</a>
+          <a href="#initiative" class="nav-link" data-page="initiative">The Initiative</a>
+          <a href="#resources" class="nav-link" data-page="resources">Resources</a>
+          <a href="#adoption" class="nav-link" data-page="adoption">Adoption</a>
+          <a href="#join" class="nav-link" data-page="join">Join</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ====== HOME PAGE ====== -->
+    <main class="page active" id="page-home">
+      <section class="hero">
+        <div class="container">
+          <div class="hero-content">
+            <p class="hero-eyebrow">The AI Open Lab</p>
+            <h1 class="hero-title">Public AI resources for ethical, transparent, and accessible AI</h1>
+            <div class="hero-actions">
+              <a href="#resources" class="btn btn-primary">Explore Resources</a>
+              <a href="#initiative" class="btn btn-outline">Learn About the Initiative</a>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <canvas id="globe-canvas" width="460" height="460"></canvas>
+            <div class="globe-caption">AI resources from public research centers worldwide</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-bar">
+        <div class="container stats-grid">
+          <div class="stat-item">
+            <span class="stat-number" data-count="15">0</span>
+            <span class="stat-label">Open Models</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" data-count="40">0</span>
+            <span class="stat-label">Datasets</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" data-count="8">0</span>
+            <span class="stat-label">Benchmarks</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" data-count="12">0</span>
+            <span class="stat-label">Languages Supported</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="home-features">
+        <div class="container">
+          <div class="features-grid">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <h3>Open Models</h3>
+              <p>Language models developed in public research centers, adapted to cultural diversity and non-global languages.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+              </div>
+              <h3>Transparent AI</h3>
+              <p>Every model, dataset, and benchmark is open and documented for full reproducibility and accountability.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              </div>
+              <h3>Accessible to All</h3>
+              <p>Public infrastructure ensuring ethical AI is available to organizations, researchers, and developers everywhere.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="newsletter-section">
+        <div class="container newsletter-inner">
+          <div class="newsletter-text">
+            <h2>Stay Informed</h2>
+            <p>Subscribe to our technical newsletter for updates on new datasets, models, technical resources, and guides on how to use them.</p>
+          </div>
+          <form class="newsletter-form" id="newsletter-form">
+            <input type="email" placeholder="Your email address" required />
+            <button type="submit" class="btn btn-primary">Subscribe</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- ====== THE INITIATIVE PAGE ====== -->
+    <main class="page" id="page-initiative">
+      <section class="page-hero">
+        <div class="container">
+          <p class="hero-eyebrow">The Initiative</p>
+          <h1>Driving ethical, open, and accessible AI</h1>
+          <p class="page-subtitle">Transparent AI through the development of a Public AI infrastructure</p>
+        </div>
+      </section>
+
+      <section class="initiative-values">
+        <div class="container">
+          <div class="values-grid">
+            <div class="value-card">
+              <div class="value-number">01</div>
+              <h3>Ethical AI</h3>
+              <p>Promoting artificial intelligence that is fair, unbiased, and respectful of human rights and cultural diversity.</p>
+            </div>
+            <div class="value-card">
+              <div class="value-number">02</div>
+              <h3>Open & Transparent</h3>
+              <p>All resources are publicly available and fully documented, ensuring reproducibility and trust in every model and dataset.</p>
+            </div>
+            <div class="value-card">
+              <div class="value-number">03</div>
+              <h3>Accessible Infrastructure</h3>
+              <p>Building public AI infrastructure so that ethical and transparent AI is accessible to all, not limited to large corporations.</p>
+            </div>
+            <div class="value-card">
+              <div class="value-number">04</div>
+              <h3>Cultural & Linguistic Diversity</h3>
+              <p>Developing resources for non-global languages and underrepresented communities, going beyond dominant language paradigms.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="timeline-section">
+        <div class="container">
+          <h2 class="section-title">Our Journey</h2>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <span class="timeline-year">2023</span>
+                <h3>Aina Kit Launch</h3>
+                <p>The Aina Kit is launched, providing the first set of language resources and tools for underrepresented languages.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <span class="timeline-year">2024</span>
+                <h3>7B Model &mdash; First Release</h3>
+                <p>The first version of the 7B parameter model is released, marking a milestone in public AI model development.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <span class="timeline-year">Late 2024</span>
+                <h3>ALIA Kit Established</h3>
+                <p>The ALIA Kit is established, expanding the suite of public AI resources and tools for language technology development.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <span class="timeline-year">2025</span>
+                <h3>40B Model &mdash; First Version</h3>
+                <p>The first version of the 40B parameter model is launched, significantly expanding the capabilities of public AI resources.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <span class="timeline-year">2026</span>
+                <h3>The AI Open Lab</h3>
+                <p>The AI Open Lab is launched to unify and provide access to all developed public AI resources in a single platform.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bsc-section">
+        <div class="container bsc-inner">
+          <div class="bsc-text">
+            <h2>Driven by the Barcelona Supercomputing Center</h2>
+            <p>This initiative is driven by the AI Institute of the <strong>Barcelona Supercomputing Center &ndash; National Supercomputing Center (BSC-CNS)</strong>, a leading public research institution dedicated to advancing science and technology for the benefit of society.</p>
+            <p>Beyond providing language models adapted to ecosystem needs, making public resources available enables more ethical and transparent AI &mdash; incorporating aspects such as cultural diversity and support for non-global languages.</p>
+          </div>
+          <div class="bsc-highlight">
+            <div class="bsc-logo-text">BSC-CNS</div>
+            <p>Barcelona Supercomputing Center<br/>National Supercomputing Center</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ====== RESOURCES PAGE ====== -->
+    <main class="page" id="page-resources">
+      <section class="page-hero">
+        <div class="container">
+          <p class="hero-eyebrow">Resources</p>
+          <h1>Explore the Catalog</h1>
+          <p class="page-subtitle">Browse open models, datasets, benchmarks, and tools developed in public research centers.</p>
+        </div>
+      </section>
+
+      <section class="resources-filters">
+        <div class="container">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label class="filter-label">Resource Type</label>
+              <div class="filter-chips" id="filter-type">
+                <button class="chip active" data-filter="all">All</button>
+                <button class="chip" data-filter="model">Models</button>
+                <button class="chip" data-filter="dataset">Datasets</button>
+                <button class="chip" data-filter="benchmark">Benchmarks</button>
+                <button class="chip" data-filter="tool">Tools & Kits</button>
+              </div>
+            </div>
+            <div class="filter-group">
+              <label class="filter-label">Modality</label>
+              <div class="filter-chips" id="filter-modality">
+                <button class="chip active" data-filter="all">All</button>
+                <button class="chip" data-filter="text">Text</button>
+                <button class="chip" data-filter="speech">Speech</button>
+                <button class="chip" data-filter="translation">Machine Translation</button>
+                <button class="chip" data-filter="multimodal">Multimodal</button>
+                <button class="chip" data-filter="vision">Vision</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="resources-list">
+        <div class="container">
+          <div class="resources-grid" id="resources-grid">
+            <!-- Populated by JS -->
+          </div>
+          <p class="no-results" id="no-results" style="display:none;">No resources match the selected filters.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- ====== ADOPTION PAGE ====== -->
+    <main class="page" id="page-adoption">
+      <section class="page-hero">
+        <div class="container">
+          <p class="hero-eyebrow">Adoption</p>
+          <h1>Frequently Asked Questions</h1>
+          <p class="page-subtitle">Everything you need to know about adopting public AI resources in your organization.</p>
+        </div>
+      </section>
+
+      <section class="adoption-benefits">
+        <div class="container">
+          <h2 class="section-title">Benefits for Organizations</h2>
+          <div class="benefits-grid">
+            <div class="benefit-card">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <h3>Full Transparency</h3>
+              <p>Complete visibility into model training data, methodologies, and performance benchmarks.</p>
+            </div>
+            <div class="benefit-card">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              </div>
+              <h3>Data Sovereignty</h3>
+              <p>Maintain control over your data with models that can be deployed on your own infrastructure.</p>
+            </div>
+            <div class="benefit-card">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              </div>
+              <h3>Community Support</h3>
+              <p>Join a growing ecosystem of organizations, researchers, and developers building with public AI.</p>
+            </div>
+            <div class="benefit-card">
+              <div class="benefit-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              </div>
+              <h3>No Vendor Lock-in</h3>
+              <p>Open licenses and standards ensure you are never locked into a single provider or platform.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="faq-section">
+        <div class="container">
+          <div class="faq-search-wrapper">
+            <input type="text" class="faq-search" id="faq-search" placeholder="Search questions..." />
+          </div>
+          <div class="faq-list" id="faq-list">
+            <!-- Populated by JS -->
+          </div>
+          <p class="no-results" id="faq-no-results" style="display:none;">No questions match your search.</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- ====== JOIN PAGE ====== -->
+    <main class="page" id="page-join">
+      <section class="page-hero">
+        <div class="container">
+          <p class="hero-eyebrow">Get Involved</p>
+          <h1>Join the AI Open Lab</h1>
+          <p class="page-subtitle">Collaborate with public research centers to build ethical and accessible AI for everyone.</p>
+        </div>
+      </section>
+
+      <section class="join-contact-top">
+        <div class="container contact-prominent">
+          <div class="contact-info-bar">
+            <p>Ready to get started? Reach out to us directly or fill in the form below.</p>
+            <a href="mailto:ai-open-lab@bsc.es" class="btn btn-primary">ai-open-lab@bsc.es</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="join-benefits">
+        <div class="container">
+          <h2 class="section-title">Why Join?</h2>
+          <div class="join-grid">
+            <div class="join-card">
+              <span class="join-number">01</span>
+              <h3>Access to a Public AI Resource Ecosystem</h3>
+              <p>Get access to a comprehensive catalog of open models, datasets, benchmarks, and tools developed by leading public research institutions.</p>
+            </div>
+            <div class="join-card">
+              <span class="join-number">02</span>
+              <h3>Consulting on Infrastructure Development</h3>
+              <p>Receive expert guidance on deploying and adapting public AI resources to your specific needs and infrastructure.</p>
+            </div>
+            <div class="join-card">
+              <span class="join-number">03</span>
+              <h3>Visibility & Recognition</h3>
+              <p>Gain visibility and recognition for contributed models and resources within the AI Open Lab ecosystem and broader research community.</p>
+            </div>
+            <div class="join-card">
+              <span class="join-number">04</span>
+              <h3>Collaborative Benchmark Access</h3>
+              <p>Participate in collaborative benchmarking efforts to evaluate and improve public AI models across diverse tasks and languages.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="contact-form-section">
+        <div class="container">
+          <h2 class="section-title">Contact Us</h2>
+          <form class="contact-form" id="contact-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="contact-name">Full Name *</label>
+                <input type="text" id="contact-name" required minlength="2" />
+              </div>
+              <div class="form-group">
+                <label for="contact-org">Organization *</label>
+                <input type="text" id="contact-org" required minlength="2" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="contact-email">Email *</label>
+                <input type="email" id="contact-email" required />
+              </div>
+              <div class="form-group">
+                <label for="contact-role">Role</label>
+                <input type="text" id="contact-role" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="contact-interest">Area of Interest *</label>
+              <select id="contact-interest" required>
+                <option value="">Select an option</option>
+                <option value="models">Using Open Models</option>
+                <option value="datasets">Accessing Datasets</option>
+                <option value="contribute">Contributing Resources</option>
+                <option value="benchmark">Collaborative Benchmarking</option>
+                <option value="consulting">Infrastructure Consulting</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="contact-message">Message *</label>
+              <textarea id="contact-message" rows="4" required minlength="10"></textarea>
+            </div>
+            <div class="form-group honeypot">
+              <label for="contact-website">Website</label>
+              <input type="text" id="contact-website" tabindex="-1" autocomplete="off" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="footer-brand">
+          <span class="logo"><span class="logo-icon">&#9670;</span> The AI Open Lab</span>
+          <p>Public AI resources for ethical, transparent, and accessible artificial intelligence.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Navigate</h4>
+          <a href="#home">Home</a>
+          <a href="#initiative">The Initiative</a>
+          <a href="#resources">Resources</a>
+          <a href="#adoption">Adoption</a>
+          <a href="#join">Join</a>
+        </div>
+        <div class="footer-contact">
+          <h4>Contact</h4>
+          <a href="mailto:ai-open-lab@bsc.es">ai-open-lab@bsc.es</a>
+          <p>Barcelona Supercomputing Center<br/>National Supercomputing Center</p>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <p>&copy; 2026 The AI Open Lab &mdash; BSC-CNS. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>
