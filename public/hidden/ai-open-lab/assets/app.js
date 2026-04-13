@@ -1,5 +1,5 @@
 /* ======================================================
-   The AI Open Lab — Application
+   The AI Open Lab — Application (v2 — Visual Overhaul)
    ====================================================== */
 
 (function () {
@@ -56,6 +56,13 @@
     if (nav) nav.classList.remove('open');
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Re-check scroll-based reveals after page switch
+    requestAnimationFrame(() => {
+      checkScrollReveals();
+      checkTimeline();
+      checkJoinCards();
+    });
   }
 
   window.addEventListener('hashchange', () => showPage(getPage()));
@@ -66,11 +73,15 @@
     showPage(getPage());
     initHeader();
     initMobileMenu();
-    initGlobe();
+    initHeroParticles();
+    initInfraCountUp();
     initCountUp();
     initResources();
     initFaq();
     initForms();
+    initScrollReveals();
+    initTimeline();
+    initJoinParallax();
   });
 
   /* ---------- HEADER SCROLL ---------- */
@@ -90,148 +101,115 @@
     toggle.addEventListener('click', () => nav.classList.toggle('open'));
   }
 
-  /* ---------- GLOBE (Canvas) ---------- */
+  /* ---------- HERO PARTICLES ---------- */
 
-  function initGlobe() {
-    const canvas = document.getElementById('globe-canvas');
-    if (!canvas) return;
+  function initHeroParticles() {
+    const container = document.getElementById('hero-particles');
+    if (!container) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
+    container.appendChild(canvas);
+
     const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const size = 460;
-    canvas.width = size * dpr;
-    canvas.height = size * dpr;
-    ctx.scale(dpr, dpr);
+    let particles = [];
+    let w, h;
 
-    const cx = size / 2;
-    const cy = size / 2;
-    const R = 180;
-    let rotation = 0;
-
-    // Simplified continent points (lon, lat) in degrees
-    const points = [
-      // Europe
-      { lon: 0, lat: 51 }, { lon: 2, lat: 48 }, { lon: 10, lat: 52 }, { lon: 12, lat: 41 },
-      { lon: -3, lat: 40 }, { lon: 15, lat: 46 }, { lon: 24, lat: 56 }, { lon: 21, lat: 42 },
-      { lon: 14, lat: 50 }, { lon: 18, lat: 59 }, { lon: 25, lat: 60 }, { lon: 30, lat: 50 },
-      // Africa
-      { lon: 3, lat: 6 }, { lon: 32, lat: -1 }, { lon: 28, lat: -26 }, { lon: -17, lat: 14 },
-      { lon: 36, lat: -6 }, { lon: 47, lat: -19 },
-      // Asia
-      { lon: 55, lat: 25 }, { lon: 77, lat: 28 }, { lon: 100, lat: 13 }, { lon: 116, lat: 39 },
-      { lon: 139, lat: 35 }, { lon: 127, lat: 37 }, { lon: 106, lat: -6 },
-      // Americas
-      { lon: -74, lat: 40 }, { lon: -99, lat: 19 }, { lon: -43, lat: -22 }, { lon: -58, lat: -34 },
-      { lon: -77, lat: -12 }, { lon: -79, lat: 4 }, { lon: -122, lat: 37 }, { lon: -73, lat: 45 },
-      // Oceania
-      { lon: 151, lat: -33 }, { lon: 174, lat: -41 },
-    ];
-
-    // Research center highlights
-    const centers = [
-      { lon: 2.15, lat: 41.39, label: 'BSC' },    // Barcelona
-      { lon: 12.5, lat: 41.9, label: 'CINECA' },   // Italy
-      { lon: 9.18, lat: 48.78, label: 'HLRS' },    // Stuttgart
-      { lon: 24.94, lat: 60.17, label: 'CSC' },    // Finland
-    ];
-
-    function project(lon, lat, rot) {
-      const phi = (90 - lat) * Math.PI / 180;
-      const theta = (lon + rot) * Math.PI / 180;
-      const x = R * Math.sin(phi) * Math.cos(theta);
-      const y = R * Math.cos(phi);
-      const z = R * Math.sin(phi) * Math.sin(theta);
-      return { x: cx + x, y: cy - y, z: z, visible: z > 0 };
+    function resize() {
+      w = canvas.width = container.offsetWidth;
+      h = canvas.height = container.offsetHeight;
     }
 
-    function drawFrame() {
-      ctx.clearRect(0, 0, size, size);
-
-      // Globe background circle
-      ctx.beginPath();
-      ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.fillStyle = '#e8eef8';
-      ctx.fill();
-
-      // Grid lines (meridians)
-      ctx.strokeStyle = 'rgba(0,49,127,0.07)';
-      ctx.lineWidth = 0.5;
-      for (let lon = -180; lon < 180; lon += 30) {
-        ctx.beginPath();
-        let started = false;
-        for (let lat = -90; lat <= 90; lat += 3) {
-          const p = project(lon, lat, rotation);
-          if (p.visible) {
-            if (!started) { ctx.moveTo(p.x, p.y); started = true; }
-            else ctx.lineTo(p.x, p.y);
-          } else {
-            started = false;
-          }
-        }
-        ctx.stroke();
+    function createParticles() {
+      particles = [];
+      const count = Math.floor((w * h) / 18000);
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 1.5 + 0.5,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          alpha: Math.random() * 0.4 + 0.1,
+        });
       }
-
-      // Parallels
-      for (let lat = -60; lat <= 60; lat += 30) {
-        ctx.beginPath();
-        let started = false;
-        for (let lon = -180; lon <= 180; lon += 3) {
-          const p = project(lon, lat, rotation);
-          if (p.visible) {
-            if (!started) { ctx.moveTo(p.x, p.y); started = true; }
-            else ctx.lineTo(p.x, p.y);
-          } else {
-            started = false;
-          }
-        }
-        ctx.stroke();
-      }
-
-      // Data points
-      points.forEach(pt => {
-        const p = project(pt.lon, pt.lat, rotation);
-        if (p.visible) {
-          const alpha = 0.15 + 0.45 * (p.z / R);
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(0,49,127,${alpha})`;
-          ctx.fill();
-        }
-      });
-
-      // Research centers (larger, with pulse)
-      const pulse = 1 + 0.2 * Math.sin(Date.now() / 500);
-      centers.forEach(c => {
-        const p = project(c.lon, c.lat, rotation);
-        if (p.visible) {
-          // Outer glow
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 10 * pulse, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(0,49,127,0.1)';
-          ctx.fill();
-          // Inner dot
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
-          ctx.fillStyle = '#00317f';
-          ctx.fill();
-          // Label
-          ctx.font = '500 11px Urbanist, sans-serif';
-          ctx.fillStyle = '#00317f';
-          ctx.fillText(c.label, p.x + 10, p.y + 4);
-        }
-      });
-
-      // Globe border
-      ctx.beginPath();
-      ctx.arc(cx, cy, R, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(0,49,127,0.12)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      rotation += 0.12;
-      requestAnimationFrame(drawFrame);
     }
 
-    drawFrame();
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 180, 216, ${p.alpha})`;
+        ctx.fill();
+      });
+
+      // Draw connections between nearby particles
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(0, 180, 216, ${0.06 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    resize();
+    createParticles();
+    draw();
+
+    window.addEventListener('resize', () => {
+      resize();
+      createParticles();
+    });
+  }
+
+  /* ---------- INFRASTRUCTURE DIAGRAM COUNT UP ---------- */
+
+  function initInfraCountUp() {
+    const nodes = document.querySelectorAll('.infra-node-count');
+    if (!nodes.length) return;
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('.infra-node-count').forEach(el => {
+            const target = parseInt(el.dataset.count, 10);
+            const duration = 1500;
+            const start = performance.now();
+            function tick(now) {
+              const elapsed = now - start;
+              const progress = Math.min(elapsed / duration, 1);
+              const eased = 1 - Math.pow(1 - progress, 3);
+              el.textContent = Math.round(target * eased);
+              if (progress < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+          });
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+
+    const diagram = document.getElementById('infra-diagram');
+    if (diagram) observer.observe(diagram);
   }
 
   /* ---------- COUNT UP ---------- */
@@ -260,6 +238,105 @@
 
     const statsBar = document.querySelector('.stats-bar');
     if (statsBar) observer.observe(statsBar);
+  }
+
+  /* ---------- SCROLL REVEAL ---------- */
+
+  function checkScrollReveals() {
+    document.querySelectorAll('.reveal-on-scroll:not(.revealed)').forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.85) {
+        el.classList.add('revealed');
+      }
+    });
+  }
+
+  function initScrollReveals() {
+    window.addEventListener('scroll', checkScrollReveals, { passive: true });
+    checkScrollReveals();
+  }
+
+  /* ---------- TIMELINE PROGRESSIVE REVEAL ---------- */
+
+  function checkTimeline() {
+    const timeline = document.getElementById('timeline');
+    const progress = document.getElementById('timeline-progress');
+    if (!timeline || !progress) return;
+
+    const items = timeline.querySelectorAll('.timeline-item');
+    const timelineRect = timeline.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+
+    let lastRevealedBottom = 0;
+
+    items.forEach((item, index) => {
+      const rect = item.getBoundingClientRect();
+      const triggerPoint = viewportHeight * 0.75;
+
+      if (rect.top < triggerPoint) {
+        if (!item.classList.contains('revealed')) {
+          item.style.transitionDelay = '0.15s';
+          item.classList.add('revealed');
+        }
+        lastRevealedBottom = rect.bottom - timelineRect.top;
+      }
+    });
+
+    // Animate the progress line
+    const maxHeight = timeline.scrollHeight;
+    const progressHeight = Math.min(lastRevealedBottom, maxHeight);
+    progress.style.height = progressHeight + 'px';
+  }
+
+  function initTimeline() {
+    window.addEventListener('scroll', checkTimeline, { passive: true });
+    checkTimeline();
+  }
+
+  /* ---------- JOIN PAGE — PARALLAX BACKGROUND & CARD REVEAL ---------- */
+
+  function checkJoinCards() {
+    const section = document.getElementById('join-benefits');
+    if (!section) return;
+
+    const cards = section.querySelectorAll('.join-card');
+    const viewportHeight = window.innerHeight;
+
+    cards.forEach((card, index) => {
+      const rect = card.getBoundingClientRect();
+      if (rect.top < viewportHeight * 0.8) {
+        if (!card.classList.contains('revealed')) {
+          card.style.transitionDelay = (index * 0.15) + 's';
+          card.classList.add('revealed');
+        }
+      }
+    });
+
+    // Parallax: shift background opacity based on scroll
+    const bg = document.getElementById('join-benefits-bg');
+    const title = document.getElementById('join-title');
+    if (!bg) return;
+
+    const sectionRect = section.getBoundingClientRect();
+    const sectionHeight = section.offsetHeight;
+    const scrolled = Math.max(0, -sectionRect.top);
+    const progress = Math.min(scrolled / (sectionHeight * 0.6), 1);
+
+    // Fade the dark background as user scrolls down
+    bg.style.opacity = 1 - progress * 0.7;
+
+    // Shift title color from white to dark
+    if (title) {
+      const r = Math.round(255 - progress * (255 - 17));
+      const g = Math.round(255 - progress * (255 - 24));
+      const b = Math.round(255 - progress * (255 - 39));
+      title.style.color = `rgb(${r}, ${g}, ${b})`;
+    }
+  }
+
+  function initJoinParallax() {
+    window.addEventListener('scroll', checkJoinCards, { passive: true });
+    checkJoinCards();
   }
 
   /* ---------- RESOURCES ---------- */
@@ -318,7 +395,7 @@
     renderResources();
   }
 
-  /* ---------- FAQ ---------- */
+  /* ---------- FAQ (multiple items can be open) ---------- */
 
   function initFaq() {
     const list = document.getElementById('faq-list');
@@ -359,13 +436,11 @@
       const answer = item.querySelector('.faq-answer');
       const isOpen = item.classList.contains('open');
 
-      // Close all
-      list.querySelectorAll('.faq-item.open').forEach(el => {
-        el.classList.remove('open');
-        el.querySelector('.faq-answer').style.maxHeight = '0';
-      });
-
-      if (!isOpen) {
+      // Toggle individually — no longer closes others
+      if (isOpen) {
+        item.classList.remove('open');
+        answer.style.maxHeight = '0';
+      } else {
         item.classList.add('open');
         answer.style.maxHeight = answer.scrollHeight + 'px';
       }
@@ -388,7 +463,7 @@
         e.preventDefault();
         const email = nlForm.querySelector('input[type="email"]').value;
         if (email) {
-          nlForm.innerHTML = '<p style="font-weight:600;color:#00317f;">Thank you! You have been subscribed.</p>';
+          nlForm.innerHTML = '<p style="font-weight:600;color:var(--accent);">Thank you! You have been subscribed.</p>';
         }
       });
     }
