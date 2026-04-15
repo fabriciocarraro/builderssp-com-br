@@ -147,7 +147,7 @@
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0, 180, 216, ${p.alpha})`;
+        ctx.fillStyle = `rgba(63, 166, 120, ${p.alpha})`;
         ctx.fill();
       });
 
@@ -161,7 +161,7 @@
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(0, 180, 216, ${0.06 * (1 - dist / 120)})`;
+            ctx.strokeStyle = `rgba(63, 166, 120, ${0.06 * (1 - dist / 120)})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -215,29 +215,40 @@
   /* ---------- COUNT UP ---------- */
 
   function initCountUp() {
+    const statsBar = document.querySelector('.stats-bar');
+    if (!statsBar) return;
+
+    function animateStats() {
+      statsBar.querySelectorAll('.stat-number').forEach(el => {
+        const target = parseInt(el.dataset.count, 10);
+        const duration = 1200;
+        const start = performance.now();
+        function tick(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.round(target * eased);
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.querySelectorAll('.stat-number').forEach(el => {
-            const target = parseInt(el.dataset.count, 10);
-            const duration = 1200;
-            const start = performance.now();
-            function tick(now) {
-              const elapsed = now - start;
-              const progress = Math.min(elapsed / duration, 1);
-              const eased = 1 - Math.pow(1 - progress, 3);
-              el.textContent = Math.round(target * eased);
-              if (progress < 1) requestAnimationFrame(tick);
-            }
-            requestAnimationFrame(tick);
+          animateStats();
+        } else {
+          // Reset numbers when the stats bar leaves the viewport so that
+          // the animation replays on the next entry.
+          statsBar.querySelectorAll('.stat-number').forEach(el => {
+            el.textContent = '0';
           });
-          observer.unobserve(entry.target);
         }
       });
     }, { threshold: 0.3 });
 
-    const statsBar = document.querySelector('.stats-bar');
-    if (statsBar) observer.observe(statsBar);
+    observer.observe(statsBar);
   }
 
   /* ---------- SCROLL REVEAL ---------- */
