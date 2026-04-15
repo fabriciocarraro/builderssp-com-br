@@ -57,11 +57,11 @@ body {
   background: linear-gradient(
     180deg,
     #000d1a 0%,
-    #001a47 10%,
-    #00317f 25%,
-    #1a5a7a 45%,
-    #3fa678 65%,
-    #a8d4a8 82%,
+    #001a47 12%,
+    #00317f 28%,
+    #3a5b8a 50%,
+    #8a9aa8 70%,
+    #d8d4be 88%,
     #f4ecd6 100%
   ) no-repeat;
   background-attachment: fixed;
