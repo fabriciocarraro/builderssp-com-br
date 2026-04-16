@@ -7,7 +7,7 @@ export function ContactSection() {
       <div className="shell">
         <SectionHeader
           eyebrow="Contato"
-          title="Quer palestrar no Builders SP?"
+          title="Quer palestrar na Builders SP?"
           description="Envie sua proposta no formulário oficial e a organização entra em contato."
         />
         <div className="contact-action reveal">
