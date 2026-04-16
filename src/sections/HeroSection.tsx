@@ -6,7 +6,7 @@ export function HeroSection() {
       <div className="shell hero-grid">
         <div className="hero-copy reveal">
           <p className="eyebrow">Comunidade de builders em São Paulo</p>
-          <h1>Builders SP:<br />Claude Code</h1>
+          <h1>Builders SP</h1>
           <p className="hero-lead">
             A maior comunidade para pessoas que constroem projetos, produtos
             e soluções reais usando ferramentas modernas de Inteligência Artificial.
