@@ -3,7 +3,7 @@ import { type EventItem } from "../types/content";
 export const events: EventItem[] = [
   {
     id: "kickoff-claude-code-2026-04",
-    title: "Kickoff da comunidade Builders SP: Claude Code",
+    title: "Kickoff da comunidade Builders SP",
     dateISO: "2026-04-15",
     dateText: "15 de abril",
     time: "19h às 22h",

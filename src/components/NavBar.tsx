@@ -8,7 +8,7 @@ interface NavBarProps {
 
 export function NavBar({ items, activeSection }: NavBarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const headerLogoSrc = `${import.meta.env.BASE_URL}images/Builders%20SP%20Claude%20Code%20com%20BG.png`;
+  const headerLogoSrc = `${import.meta.env.BASE_URL}images/Builders%20SP%20com%20BG.png`;
 
   useEffect(() => {
     setIsOpen(false);
@@ -18,9 +18,9 @@ export function NavBar({ items, activeSection }: NavBarProps) {
     <header className="site-header">
       <div className="shell header-shell">
         <a className="brand" href="#top" aria-label="Voltar para o topo">
-          <img className="brand-logo" src={headerLogoSrc} alt="Logo Builders SP: Claude Code" />
+          <img className="brand-logo" src={headerLogoSrc} alt="Logo Builders SP" />
           <span className="brand-text">
-            <strong>Builders SP: Claude Code</strong>
+            <strong>Builders SP</strong>
           </span>
         </a>
 
