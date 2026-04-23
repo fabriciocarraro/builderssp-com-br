@@ -280,7 +280,7 @@
         <path class="a" d="M20 54 L80 28 L140 54 L80 80 Z"/>
         <path class="s" d="M20 54 L80 28 L140 54 L80 80 Z" fill="none"/>
         <text x="80" y="60" text-anchor="middle" font-family="'Urbanist', sans-serif"
-              font-style="italic" font-size="13" font-weight="700" fill="var(--ink)">Scoreboards</text>
+              font-style="italic" font-size="13" font-weight="700" fill="var(--ink)">Accuracy</text>
         <!-- Middle section (two faces) -->
         <path class="a" d="M20 54 L20 70 L80 96 L80 80 Z"/>
         <path class="s" d="M20 54 L20 70 L80 96 L80 80 Z" fill="none"/>
@@ -742,27 +742,20 @@
         </g>
       </symbol>`,
 
-    // Storage disk array — stacked storage trays in iso
+    // Storage disk array — stacked iso trays (clean, no floating details)
     storageArray: `
       <symbol id="sym-storageArray" viewBox="0 0 140 110">
-        <!-- three stacked iso trays -->
         <g>
           <path class="f" d="M18 78 L70 52 L122 78 L70 104 Z"/>
           <path class="s" d="M18 78 L70 52 L122 78 L70 104 Z" fill="none"/>
-          <circle class="a" cx="44" cy="75" r="2.2"/>
-          <rect class="a" x="54" y="68" width="30" height="4" rx="1" transform="skewX(-28) translate(22 36)"/>
         </g>
         <g>
           <path class="f" d="M18 60 L70 34 L122 60 L70 86 Z"/>
           <path class="s" d="M18 60 L70 34 L122 60 L70 86 Z" fill="none"/>
-          <circle class="a" cx="44" cy="57" r="2.2"/>
-          <rect class="a" x="54" y="50" width="30" height="4" rx="1" transform="skewX(-28) translate(22 28)"/>
         </g>
         <g>
-          <path class="f" d="M18 42 L70 16 L122 42 L70 68 Z"/>
+          <path class="a" d="M18 42 L70 16 L122 42 L70 68 Z"/>
           <path class="s" d="M18 42 L70 16 L122 42 L70 68 Z" fill="none"/>
-          <circle class="a" cx="44" cy="39" r="2.2"/>
-          <rect class="a" x="54" y="32" width="30" height="4" rx="1" transform="skewX(-28) translate(22 18)"/>
         </g>
         <!-- side verticals showing depth -->
         <g class="s" fill="none" stroke-width="1.2">
