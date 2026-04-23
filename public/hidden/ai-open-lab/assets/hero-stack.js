@@ -25,7 +25,7 @@
 
   // Scene layout
   const SCENE_W = 1100;
-  const SCENE_H = 1820;
+  const SCENE_H = 1280;
   const CENTER_X = SCENE_W / 2;
 
   // Plane: rhombus in grid space from (0,0) to (PLANE,PLANE),
@@ -34,9 +34,8 @@
   const PLANE = 62;
 
   // Vertical offset (in SVG units) of each layer's "grid origin"
-  // (which is its back tip). Spacing must exceed PLANE*2*IY (plane
-  // vertical extent) plus illustration headroom, or planes/items overlap.
-  const LAYER_Y = [170, 470, 770, 1070, 1370];
+  // (which is its back tip). Layers descend the page.
+  const LAYER_Y = [170, 390, 610, 830, 1050];
 
   // Project grid (gx, gy) on layer `li` to screen (sx, sy)
   function iso(gx, gy, li) {
@@ -745,11 +744,10 @@
      ------------------------------------------------------------------ */
 
   const LAYERS = [
-    // Layout strategy: PLANE is 62 x 62 in grid units. We spread items
-    // across the rhombus by varying (gx + gy) for front/back depth and
-    // (gx − gy) for left/right. Keep items ~8+ units from each edge and
-    // ~22+ units apart measured by iso(gx,gy) distance so they don't
-    // overlap. Fewer items per layer = cleaner reading.
+    // Layout strategy: 3 items per plane. Placed along the rhombus's
+    // long axis — one near the left tip, one in the center, one near
+    // the right tip. Items are small (w,h ~12) so they fit inside the
+    // plane with visible space around them.
     {
       id: 'apps',
       name: 'Apps & Tools',
@@ -757,16 +755,11 @@
       desc: 'End-user surfaces — IDE plugins, APIs, playgrounds and CLI wrappers.',
       items: ['Aina Kit', 'ALIA Kit', 'Playground', 'REST API', 'CLI', 'SDK'],
       objects: [
-        // Across the rhombus: app icon (left), browser (back), API (mid), laptop (front), search (right)
-        { kind: 'appIcon',     gx: 16, gy: 46, w: 14, h: 14 },   // left tip area
-        { kind: 'browserWin1', gx: 30, gy: 14, w: 20, h: 16 },   // back area
-        { kind: 'apiGlobe',    gx: 34, gy: 32, w: 20, h: 16 },   // center
-        { kind: 'laptop',      gx: 48, gy: 44, w: 22, h: 14 },   // front-right
-        { kind: 'searchCard',  gx: 50, gy: 20, w: 18, h: 16 },   // right tip area
+        { kind: 'browserWin1', gx: 22, gy: 40, w: 12, h: 12 },   // left
+        { kind: 'apiGlobe',    gx: 31, gy: 31, w: 14, h: 12 },   // center
+        { kind: 'laptop',      gx: 40, gy: 22, w: 14, h: 10 },   // right
       ],
-      links: [
-        [0, 2], [1, 2], [2, 3], [2, 4]
-      ],
+      links: [[0, 1], [1, 2]],
     },
     {
       id: 'benchmarks',
@@ -775,15 +768,11 @@
       desc: 'Evaluation suites across tasks, languages and fairness dimensions.',
       items: ['LinguaBench', 'SpeechBench', 'VisionEval', 'TranslatEval'],
       objects: [
-        { kind: 'lineChart',      gx: 18, gy: 30, w: 18, h: 14 },   // left-mid
-        { kind: 'barChart',       gx: 32, gy: 18, w: 16, h: 16 },   // back
-        { kind: 'clipboard',      gx: 48, gy: 18, w: 14, h: 16 },   // right-back
-        { kind: 'scoreboard',     gx: 36, gy: 44, w: 22, h: 18 },   // front-center
-        { kind: 'lineChartCurve', gx: 50, gy: 38, w: 18, h: 14 },   // front-right
+        { kind: 'lineChart',   gx: 22, gy: 40, w: 12, h: 10 },   // left
+        { kind: 'scoreboard',  gx: 31, gy: 31, w: 16, h: 14 },   // center
+        { kind: 'clipboard',   gx: 42, gy: 22, w: 10, h: 12 },   // right
       ],
-      links: [
-        [0, 3], [1, 3], [3, 4], [2, 4]
-      ],
+      links: [[0, 1], [1, 2]],
     },
     {
       id: 'models',
@@ -792,15 +781,11 @@
       desc: 'Open language, speech, vision and multimodal models — trained in public.',
       items: ['ALIA 40B', 'ALIA 7B', 'Aina-MT', 'Whisper-cat', 'Vision-OC'],
       objects: [
-        { kind: 'neuralNet',        gx: 16, gy: 32, w: 18, h: 16 },   // left
-        { kind: 'cnnRnnNet',        gx: 28, gy: 46, w: 20, h: 16 },   // front-left
-        { kind: 'transformerStack', gx: 36, gy: 22, w: 18, h: 22 },   // back-center
-        { kind: 'algorithmFlow',    gx: 50, gy: 18, w: 18, h: 20 },   // back-right
-        { kind: 'trainingFlow',     gx: 50, gy: 42, w: 22, h: 16 },   // front-right
+        { kind: 'neuralNet',        gx: 22, gy: 40, w: 12, h: 12 },   // left
+        { kind: 'transformerStack', gx: 31, gy: 31, w: 14, h: 16 },   // center
+        { kind: 'algorithmFlow',    gx: 42, gy: 22, w: 12, h: 14 },   // right
       ],
-      links: [
-        [0, 2], [1, 2], [2, 3], [2, 4]
-      ],
+      links: [[0, 1], [1, 2]],
     },
     {
       id: 'datasets',
@@ -809,15 +794,11 @@
       desc: 'Curated open corpora across text, speech, translation and multimodal data.',
       items: ['Aina Speech', 'Multilingual MT Set', 'MultiModal Commons', 'Visual Scenes', 'Parallel Corpora'],
       objects: [
-        { kind: 'dbStack',      gx: 16, gy: 30, w: 20, h: 16 },   // left
-        { kind: 'textDocs',     gx: 30, gy: 14, w: 20, h: 16 },   // back-left
-        { kind: 'dataLake',     gx: 28, gy: 44, w: 22, h: 14 },   // front-left
-        { kind: 'imageTiles',   gx: 44, gy: 30, w: 18, h: 18 },   // center
-        { kind: 'spreadsheet',  gx: 50, gy: 44, w: 20, h: 14 },   // right
+        { kind: 'dbStack',     gx: 22, gy: 40, w: 14, h: 10 },   // left
+        { kind: 'dataLake',    gx: 31, gy: 31, w: 14, h: 12 },   // center
+        { kind: 'textDocs',    gx: 42, gy: 22, w: 12, h: 12 },   // right
       ],
-      links: [
-        [0, 2], [1, 3], [2, 3], [3, 4]
-      ],
+      links: [[0, 1], [1, 2]],
     },
     {
       id: 'infra',
@@ -826,15 +807,11 @@
       desc: 'Public supercomputing — GPU & TPU clusters, storage, networking run by BSC-CNS.',
       items: ['MareNostrum 5', 'GPU Nodes', 'TPU Pods', 'Storage', 'Interconnect'],
       objects: [
-        { kind: 'serverRacks',  gx: 18, gy: 32, w: 22, h: 20 },   // left
-        { kind: 'serverNodes',  gx: 30, gy: 46, w: 20, h: 16 },   // front-left
-        { kind: 'cableShort',   gx: 36, gy: 16, w: 20, h: 12 },   // back
-        { kind: 'cableLoop',    gx: 50, gy: 42, w: 22, h: 14 },   // front-right
-        { kind: 'tpuCard',      gx: 50, gy: 22, w: 22, h: 12 },   // back-right
+        { kind: 'serverRacks', gx: 22, gy: 40, w: 14, h: 14 },   // left
+        { kind: 'tpuCard',     gx: 31, gy: 31, w: 16, h: 10 },   // center
+        { kind: 'cableLoop',   gx: 42, gy: 22, w: 14, h: 10 },   // right
       ],
-      links: [
-        [0, 1], [0, 2], [2, 4], [4, 3]
-      ],
+      links: [[0, 1], [1, 2]],
     },
   ];
 
@@ -880,18 +857,14 @@
     // Footprint bounding box (the rhombus footprint projected to screen).
     const boxW = (w + h) * IX;
     const boxH = (w + h) * IY;
-    // Modest vertical headroom so items that stand up from the plane
-    // (racks, cylinders, etc.) aren't clipped. Proportional to footprint
-    // height — NOT width — so items stay roughly in proportion.
-    const headroom = boxH * 1.6;
-    const totalW = boxW;
-    const totalH = boxH + headroom;
-    const x = ctr.x - totalW / 2;
-    // Anchor the illustration so its base (bottom of viewBox) sits at the
-    // front half of the footprint — looks grounded on the plane.
-    const y = ctr.y - totalH + boxH * 0.5;
+    // Render the illustration in a box roughly the size of the footprint,
+    // centered on the iso center. A square box (boxW × boxW) works well
+    // because illustrations are authored with roughly 1:1 aspect.
+    const renderSize = boxW;
+    const x = ctr.x - renderSize / 2;
+    const y = ctr.y - renderSize / 2;
 
-    return `<svg x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${totalW.toFixed(1)}" height="${totalH.toFixed(1)}" overflow="visible">
+    return `<svg x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${renderSize.toFixed(1)}" height="${renderSize.toFixed(1)}" overflow="visible">
               <use href="#sym-${kind}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/>
             </svg>`;
   }
