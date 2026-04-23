@@ -1,19 +1,27 @@
 /* ======================================================
-   Interactive Layered Stack — Hero Replacement
-   CSS-3D isometric diagram, hover/click aware
+   Interactive Layered Stack — Hero Replacement (v3)
+   Isometric diagram inspired by the reference illustration.
    ====================================================== */
 
 .stack-scene {
-  position: relative;
-  width: 100%;
-  max-width: 520px;
-  aspect-ratio: 1 / 1.25;
-  margin: 0 auto;
-  perspective: 2200px;
-  perspective-origin: 50% 40%;
-  user-select: none;
   --tilt-x: 0deg;
   --tilt-y: 0deg;
+  --ink: #1e2a4a;
+  --ink-soft: #2a3a63;
+  --cream: #f4ecd6;
+  --beige: #d9c7a0;
+  --beige-soft: #e8d9b5;
+  --plane-bg: rgba(255, 252, 244, 0.88);
+  --plane-border: rgba(40, 50, 80, 0.35);
+
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  aspect-ratio: 1 / 1.18;
+  margin: 0 auto;
+  perspective: 2400px;
+  perspective-origin: 50% 42%;
+  user-select: none;
   overflow: visible;
 }
 
@@ -23,97 +31,151 @@
   transform-style: preserve-3d;
   transform:
     rotateX(calc(58deg + var(--tilt-x)))
-    rotateZ(calc(-42deg + var(--tilt-y)));
+    rotateZ(calc(-45deg + var(--tilt-y)));
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Each layer is an absolutely-positioned plane, stacked in Z via translateZ */
+/* Each layer is a 3D plane floating at its own Z height */
 .stack-layer {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 62%;
-  height: 62%;
-  margin-left: -31%;
-  margin-top: -31%;
+  width: 72%;
+  height: 72%;
+  margin-left: -36%;
+  margin-top: -36%;
   transform-style: preserve-3d;
   transform: translateZ(var(--z, 0px));
   transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   cursor: pointer;
   pointer-events: none;
 }
-.stack-plane, .stack-glyphs, .stack-label { pointer-events: auto; }
 
+/* Everything rendered on a plane needs to opt back in to events */
+.stack-plane,
+.stack-glyphs,
+.stack-connectors { pointer-events: auto; }
+
+/* The physical plane — cream, with subtle checkerboard */
 .stack-plane {
   position: absolute;
   inset: 0;
-  background:
-    repeating-conic-gradient(
-      from 0deg at 50% 50%,
-      rgba(0, 26, 71, 0.06) 0deg 90deg,
-      rgba(244, 236, 214, 0.0) 90deg 180deg
-    );
-  background-size: 22px 22px;
-  background-color: rgba(244, 236, 214, 0.78);
-  border: 1px solid rgba(0, 26, 71, 0.25);
+  background-color: var(--plane-bg);
+  background-image:
+    linear-gradient(45deg, rgba(0,26,71,0.04) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0,26,71,0.04) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0,26,71,0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0,26,71,0.04) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  border: 1px solid var(--plane-border);
   box-shadow:
-    0 2px 0 rgba(0, 26, 71, 0.08),
-    0 20px 40px -20px rgba(0, 0, 0, 0.4);
+    0 1px 0 rgba(40, 50, 80, 0.08),
+    0 30px 55px -30px rgba(0, 0, 0, 0.45);
   transition:
     background-color 0.4s ease,
     border-color 0.4s ease,
-    box-shadow 0.4s ease;
+    box-shadow 0.4s ease,
+    transform 0.5s ease;
 }
 
+/* Active / dim states */
 .stack-layer[data-state="active"] .stack-plane {
-  background-color: rgba(244, 236, 214, 0.95);
+  background-color: rgba(255, 252, 244, 0.98);
   border-color: var(--accent, #3fa678);
   box-shadow:
     0 0 0 2px rgba(63, 166, 120, 0.35),
-    0 24px 48px -16px rgba(63, 166, 120, 0.5);
+    0 30px 60px -20px rgba(63, 166, 120, 0.5);
 }
 
 .stack-layer[data-state="dim"] .stack-plane {
-  background-color: rgba(244, 236, 214, 0.35);
-  border-color: rgba(0, 26, 71, 0.15);
+  background-color: rgba(255, 252, 244, 0.45);
+  border-color: rgba(40, 50, 80, 0.15);
 }
-.stack-layer[data-state="dim"] .stack-glyphs {
-  opacity: 0.4;
+.stack-layer[data-state="dim"] .stack-glyphs,
+.stack-layer[data-state="dim"] .stack-connectors {
+  opacity: 0.35;
 }
 
-/* Layer label — flat on the plane, counter-rotated so it reads upright */
-.stack-label {
+/* Glyph container on the plane */
+.stack-glyphs {
   position: absolute;
-  left: -2px;
-  top: 50%;
-  transform: translate(-100%, -50%) translateZ(2px);
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: rgba(244, 236, 214, 0.95);
-  border: 1px solid rgba(0, 26, 71, 0.25);
-  color: #001a47;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  transition: all 0.35s ease;
+  inset: 0;
+  transition: opacity 0.4s ease;
+}
+
+.glyph {
+  position: absolute;
+  transform: translateZ(0);
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) var(--glyph-delay, 0s),
+    filter 0.4s ease;
+  filter: drop-shadow(0 1px 0 rgba(40, 50, 80, 0.08));
+}
+
+.glyph svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Shared SVG style — cream fills, ink strokes, beige accent */
+.glyph svg .s {
+  stroke: var(--ink);
+  stroke-width: 1.3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.glyph svg .f {
+  fill: #fffcf2;
+  stroke: var(--ink);
+  stroke-width: 1.3;
+  stroke-linejoin: round;
+}
+.glyph svg .a {
+  fill: var(--beige);
+  stroke: var(--ink);
+  stroke-width: 1.1;
+  stroke-linejoin: round;
+}
+
+/* On-hover lift of each glyph — gives a subtle 3D pop */
+.stack-layer[data-state="active"] .glyph {
+  transform: translateZ(10px);
+}
+.stack-layer[data-state="active"] .glyph:nth-child(2n) {
+  transform: translateZ(16px);
+}
+.stack-layer[data-state="active"] .glyph:nth-child(3n) {
+  transform: translateZ(22px);
+}
+
+/* Intra-layer dashed connectors (curved SVG arrows) */
+.stack-connectors {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
   pointer-events: none;
 }
-
-.stack-layer[data-state="active"] .stack-label {
-  background: var(--accent, #3fa678);
-  color: #fff;
-  border-color: var(--accent, #3fa678);
-  transform: translate(-100%, -50%) translateZ(2px) scale(1.05);
+.stack-connectors .conn-path {
+  fill: none;
+  stroke: rgba(40, 50, 80, 0.55);
+  stroke-width: 0.6;
+  stroke-dasharray: 1.6 1.4;
+  stroke-linecap: round;
+}
+.stack-connectors .conn-head {
+  fill: rgba(40, 50, 80, 0.7);
+  stroke: none;
 }
 
-/* Count badge rides above the label on active */
+/* Count badge — hidden until active */
 .stack-count {
   position: absolute;
-  right: -2px;
-  top: 14%;
-  transform: translate(100%, -50%) translateZ(2px);
+  right: 0;
+  top: 10%;
+  transform: translate(110%, -50%) translateZ(4px);
   padding: 4px 10px;
   border-radius: 999px;
   background: #001a47;
@@ -125,236 +187,101 @@
   transition: opacity 0.35s ease, transform 0.35s ease;
   pointer-events: none;
 }
-
 .stack-layer[data-state="active"] .stack-count {
   opacity: 1;
-  transform: translate(120%, -50%) translateZ(2px);
+  transform: translate(125%, -50%) translateZ(4px);
 }
 
-/* Glyphs container — sits on the plane */
-.stack-glyphs {
+/* ------------------------------------------------------
+   Side-label rails (outside 3D world)
+   Two vertical rails flanking the scene, each with
+   a dashed arrow and per-layer tag buttons.
+   ------------------------------------------------------ */
+
+.stack-rail {
   position: absolute;
-  inset: 0;
-  transition: opacity 0.4s ease;
-}
-
-.glyph {
-  position: absolute;
-  width: 22%;
-  height: 22%;
-  margin-left: -11%;
-  margin-top: -11%;
-  transform: translateZ(0);
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
-}
-
-.glyph svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.stack-layer[data-state="active"] .glyph {
-  transform: translateZ(12px);
-}
-.stack-layer[data-state="active"] .glyph:nth-child(2n) {
-  transform: translateZ(18px);
-}
-.stack-layer[data-state="active"] .glyph:nth-child(3n) {
-  transform: translateZ(22px);
-}
-
-/* Iso glyph SVG stroke defaults */
-.glyph svg .stroke { stroke: #001a47; stroke-width: 1.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.glyph svg .fill { fill: rgba(244, 236, 214, 0.95); stroke: #001a47; stroke-width: 1.4; stroke-linejoin: round; }
-.glyph svg .accent { fill: rgba(63, 166, 120, 0.35); stroke: #001a47; stroke-width: 1.2; }
-
-/* Dashed connectors between adjacent layers */
-.stack-connector {
-  position: absolute;
-  width: 1px;
-  background: transparent;
-  border-left: 1.25px dashed rgba(0, 26, 71, 0.4);
-  left: var(--cx, 50%);
-  top: var(--cy, 50%);
-  height: var(--ch, 60px);
-  transform: translateZ(var(--cz, 0px));
-  opacity: 0.5;
-  transition: opacity 0.4s ease;
-}
-
-.stack-scene[data-flow="on"] .stack-connector {
-  opacity: 1;
-}
-
-/* Flowing dot travels along connector via CSS anim */
-.flow-dot {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent, #3fa678);
-  box-shadow: 0 0 10px rgba(63, 166, 120, 0.8);
-  left: var(--cx, 50%);
-  top: var(--cy, 50%);
-  transform: translateZ(0);
-  opacity: 0;
-}
-
-.stack-scene[data-flow="on"] .flow-dot {
-  animation: flow-up var(--flow-dur, 2.6s) linear infinite;
-  animation-delay: var(--flow-delay, 0s);
-}
-
-@keyframes flow-up {
-  0%   { transform: translateZ(0px); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateZ(var(--flow-z, 500px)); opacity: 0; }
-}
-
-/* Tooltip panel — absolutely positioned over the scene, not inside 3D world */
-.stack-tooltip {
-  position: absolute;
-  left: 50%;
-  bottom: -12px;
-  transform: translateX(-50%) translateY(100%);
-  min-width: 260px;
-  max-width: 320px;
-  padding: 16px 18px;
-  border-radius: 14px;
-  background: rgba(244, 236, 214, 0.97);
-  color: #001a47;
-  border: 1px solid rgba(0, 26, 71, 0.2);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  opacity: 0;
+  top: 4%;
+  bottom: 4%;
+  width: 14%;
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  z-index: 5;
-}
-
-.stack-tooltip.open {
-  opacity: 1;
-  transform: translateX(-50%) translateY(100%) translateY(-4px);
-  pointer-events: auto;
-}
-
-.stack-tooltip-title {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 8px;
+  padding: 2% 0;
+  z-index: 3;
 }
-.stack-tooltip-title h4 {
-  font-size: 0.95rem;
-  color: #001a47;
-  font-weight: 700;
-  margin: 0;
-}
-.stack-tooltip-count {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: var(--accent, #3fa678);
-  color: #fff;
-}
-.stack-tooltip-desc {
-  font-size: 0.82rem;
-  line-height: 1.55;
-  color: #374151;
-  margin-bottom: 10px;
-}
-.stack-tooltip-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.stack-tooltip-list span {
-  font-size: 0.72rem;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: rgba(0, 26, 71, 0.08);
-  color: #001a47;
-  border: 1px solid rgba(0, 26, 71, 0.1);
-}
+.stack-rail-left { left: 0; align-items: flex-start; }
+.stack-rail-right { right: 0; align-items: flex-end; }
 
-/* Legend under the stack — visible when nothing is selected */
-.stack-legend {
-  pointer-events: none;
+.rail-svg {
   position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 10px;
   left: 50%;
-  bottom: -6px;
-  transform: translateX(-50%) translateY(100%);
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  font-size: 0.72rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-  font-weight: 500;
-  transition: opacity 0.3s ease;
+  transform: translateX(-50%);
+  pointer-events: none;
 }
-.stack-legend::before,
-.stack-legend::after {
-  content: '';
-  display: inline-block;
-  width: 18px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.25);
-}
-.stack-scene[data-hastooltip="1"] .stack-legend { opacity: 0; }
+.stack-rail-left .rail-svg  { left: auto; right: 4px; }
+.stack-rail-right .rail-svg { left: 4px; }
 
-/* Mode selector pills — small, bottom-right of hero */
-.stack-modes {
-  position: absolute;
-  top: 8px;
-  right: 0;
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 999px;
-  background: rgba(0, 13, 26, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(8px);
-  z-index: 4;
+.rail-svg .rail-line {
+  stroke: rgba(40, 50, 80, 0.5);
+  stroke-width: 0.8;
+  fill: none;
+  stroke-dasharray: 2 2;
+  stroke-linecap: round;
 }
-.stack-mode-btn {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.6);
-  font-family: var(--font);
-  font-size: 0.7rem;
+.rail-svg .rail-arrow {
+  stroke: rgba(40, 50, 80, 0.7);
+  stroke-width: 0.8;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.rail-tag {
+  pointer-events: auto;
+  cursor: pointer;
+  background: rgba(255, 252, 244, 0.95);
+  border: 1px solid rgba(40, 50, 80, 0.3);
+  color: var(--ink);
+  font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.3px;
   padding: 6px 12px;
   border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.25s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(40, 50, 80, 0.1);
+  transition: all 0.3s ease;
+  font-family: inherit;
 }
-.stack-mode-btn:hover { color: #fff; }
-.stack-mode-btn[aria-pressed="true"] {
+.rail-tag:hover {
+  border-color: var(--accent, #3fa678);
+  color: var(--ink);
+}
+.rail-tag[data-state="active"] {
   background: var(--accent, #3fa678);
   color: #fff;
+  border-color: var(--accent, #3fa678);
+  transform: scale(1.04);
+}
+.rail-tag[data-state="dim"] {
+  opacity: 0.5;
 }
 
 /* Hint text */
 .stack-hint {
   position: absolute;
-  top: 8px;
-  left: 0;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.65);
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
   gap: 6px;
+  z-index: 4;
 }
 .stack-hint-dot {
   width: 6px;
@@ -373,32 +300,32 @@
   0%, 100% { translate: 0 0 0; }
   50%      { translate: 0 -2px 0; }
 }
-
-.stack-layer {
-  animation: idle-float 6s ease-in-out infinite;
-}
+.stack-layer { animation: idle-float 6s ease-in-out infinite; }
 .stack-layer:nth-child(1) { animation-delay: 0s; }
 .stack-layer:nth-child(2) { animation-delay: 0.4s; }
 .stack-layer:nth-child(3) { animation-delay: 0.8s; }
 .stack-layer:nth-child(4) { animation-delay: 1.2s; }
 .stack-layer:nth-child(5) { animation-delay: 1.6s; }
 
-/* Exploded-view mode */
-.stack-scene[data-mode="exploded"] .stack-world {
-  transform:
-    rotateX(calc(56deg + var(--tilt-x)))
-    rotateZ(calc(-44deg + var(--tilt-y)))
-    scale(0.92);
-}
-
 /* Responsive */
 @media (max-width: 900px) {
-  .stack-scene { max-width: 420px; }
-  .stack-modes { top: 4px; }
-  .stack-hint { display: none; }
+  .stack-scene { max-width: 480px; }
+  .rail-tag { font-size: 10px; padding: 4px 8px; }
 }
 @media (max-width: 640px) {
-  .stack-scene { max-width: 340px; }
+  .stack-scene { max-width: 360px; }
+  .rail-tag { font-size: 9px; padding: 3px 6px; }
+  .stack-hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack-layer,
+  .glyph,
+  .stack-world,
+  .rail-tag {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 /* Hide the original static image when interactive stack is present */
