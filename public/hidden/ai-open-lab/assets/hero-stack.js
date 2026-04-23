@@ -25,7 +25,7 @@
 
   // Scene layout
   const SCENE_W = 1100;
-  const SCENE_H = 1440;
+  const SCENE_H = 1820;
   const CENTER_X = SCENE_W / 2;
 
   // Plane: rhombus in grid space from (0,0) to (PLANE,PLANE),
@@ -34,8 +34,9 @@
   const PLANE = 62;
 
   // Vertical offset (in SVG units) of each layer's "grid origin"
-  // (which is its back tip). Layers descend the page.
-  const LAYER_Y = [170, 350, 530, 710, 890];
+  // (which is its back tip). Spacing must exceed PLANE*2*IY (plane
+  // vertical extent) plus illustration headroom, or planes/items overlap.
+  const LAYER_Y = [170, 470, 770, 1070, 1370];
 
   // Project grid (gx, gy) on layer `li` to screen (sx, sy)
   function iso(gx, gy, li) {
@@ -876,18 +877,19 @@
   // the plane in screen space, so they need room above their base).
   function placeSymbol(kind, gx, gy, w, h, li) {
     const ctr = iso(gx, gy, li);
-    // Iso footprint bounding box in screen units.
-    // Max horizontal extent from center = (w + h) / 2 * IX  (at left/right tips)
-    // Max vertical extent from center   = (w + h) / 2 * IY  (at front/back tips)
+    // Footprint bounding box (the rhombus footprint projected to screen).
     const boxW = (w + h) * IX;
     const boxH = (w + h) * IY;
-    // Headroom above footprint for illustrations that stand up from the plane.
-    // Empirically ~ boxW / 2 gives a pleasing 3:2 aspect for most items.
-    const headroom = boxW * 0.55;
+    // Modest vertical headroom so items that stand up from the plane
+    // (racks, cylinders, etc.) aren't clipped. Proportional to footprint
+    // height — NOT width — so items stay roughly in proportion.
+    const headroom = boxH * 1.6;
     const totalW = boxW;
     const totalH = boxH + headroom;
     const x = ctr.x - totalW / 2;
-    const y = ctr.y - headroom - boxH / 2;   // anchor base of illustration near iso center
+    // Anchor the illustration so its base (bottom of viewBox) sits at the
+    // front half of the footprint — looks grounded on the plane.
+    const y = ctr.y - totalH + boxH * 0.5;
 
     return `<svg x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${totalW.toFixed(1)}" height="${totalH.toFixed(1)}" overflow="visible">
               <use href="#sym-${kind}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/>
