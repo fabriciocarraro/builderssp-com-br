@@ -275,32 +275,73 @@
     if (!timeline || !progress) return;
 
     const items = timeline.querySelectorAll('.timeline-item');
-    const timelineRect = timeline.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
+    if (!items.length) return;
 
-    let lastRevealedBottom = 0;
+    const section = timeline.closest('.timeline-section');
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+    // Mobile / small screens: fall back to per-item viewport reveal (vertical).
+    if (isMobile || !section) {
+      const viewportHeight = window.innerHeight;
+      let lastRevealedOffset = 0;
+      items.forEach(item => {
+        const rect = item.getBoundingClientRect();
+        if (rect.top < viewportHeight * 0.75) {
+          if (!item.classList.contains('revealed')) {
+            item.style.transitionDelay = '0.15s';
+            item.classList.add('revealed');
+          }
+          lastRevealedOffset = rect.bottom - timeline.getBoundingClientRect().top;
+        }
+      });
+      progress.style.width = '';
+      progress.style.height = Math.min(lastRevealedOffset, timeline.scrollHeight) + 'px';
+      return;
+    }
+
+    // Desktop: horizontal timeline driven by scroll progress through the
+    // sticky-pinned section. Each item appears as the user scrolls one
+    // viewport further through the section.
+    const sectionRect = section.getBoundingClientRect();
+    const scrollableDistance = section.offsetHeight - window.innerHeight;
+    const scrolled = Math.min(Math.max(-sectionRect.top, 0), scrollableDistance);
+    const rawProgress = scrollableDistance > 0 ? scrolled / scrollableDistance : 0;
+
+    // Reserve the first slice so only the first point is visible at the start,
+    // then reveal the remaining items across the rest of the scroll range.
+    const startThreshold = 0.08;
+    const activeProgress = Math.max(0, (rawProgress - startThreshold) / (1 - startThreshold));
+    const revealCount = 1 + Math.floor(activeProgress * items.length);
 
     items.forEach((item, index) => {
-      const rect = item.getBoundingClientRect();
-      const triggerPoint = viewportHeight * 0.75;
-
-      if (rect.top < triggerPoint) {
+      if (index < revealCount) {
         if (!item.classList.contains('revealed')) {
-          item.style.transitionDelay = '0.15s';
+          item.style.transitionDelay = (index === 0 ? 0 : 0.05) + 's';
           item.classList.add('revealed');
         }
-        lastRevealedBottom = rect.bottom - timelineRect.top;
+      } else {
+        item.classList.remove('revealed');
       }
     });
 
-    // Animate the progress line
-    const maxHeight = timeline.scrollHeight;
-    const progressHeight = Math.min(lastRevealedBottom, maxHeight);
-    progress.style.height = progressHeight + 'px';
+    // Horizontal progress line: stretches across revealed markers.
+    const firstItem = items[0];
+    const lastRevealed = items[Math.min(revealCount, items.length) - 1];
+    if (firstItem && lastRevealed) {
+      const timelineRect = timeline.getBoundingClientRect();
+      const startRect = firstItem.getBoundingClientRect();
+      const endRect = lastRevealed.getBoundingClientRect();
+      const left = (startRect.left + startRect.width / 2) - timelineRect.left;
+      const right = (endRect.left + endRect.width / 2) - timelineRect.left;
+      progress.style.height = '';
+      progress.style.left = left + 'px';
+      progress.style.width = Math.max(0, right - left) + 'px';
+    }
   }
 
   function initTimeline() {
     window.addEventListener('scroll', checkTimeline, { passive: true });
+    window.addEventListener('resize', checkTimeline, { passive: true });
     checkTimeline();
   }
 
@@ -336,11 +377,11 @@
     // Fade the dark background as user scrolls down
     bg.style.opacity = 1 - progress * 0.7;
 
-    // Shift title color from white to dark
+    // Shift title color from dark (top cream bg) to light (bottom navy bg)
     if (title) {
-      const r = Math.round(255 - progress * (255 - 17));
-      const g = Math.round(255 - progress * (255 - 24));
-      const b = Math.round(255 - progress * (255 - 39));
+      const r = Math.round(17 + progress * (255 - 17));
+      const g = Math.round(24 + progress * (255 - 24));
+      const b = Math.round(39 + progress * (255 - 39));
       title.style.color = `rgb(${r}, ${g}, ${b})`;
     }
   }
