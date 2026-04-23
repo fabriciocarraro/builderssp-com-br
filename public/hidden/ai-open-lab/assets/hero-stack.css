@@ -89,7 +89,7 @@
 }
 .stack-svg .side-label text {
   fill: #001a47;
-  font-size: 15px;
+  font-size: 26px;
   font-weight: 700;
   letter-spacing: 0.2px;
   pointer-events: none;
@@ -136,11 +136,11 @@
 /* -------- RESPONSIVE -------- */
 @media (max-width: 900px) {
   .hero-image.has-interactive { max-width: 520px; }
-  .stack-svg .side-label text { font-size: 13px; }
+  .stack-svg .side-label text { font-size: 24px; }
 }
 @media (max-width: 640px) {
   .hero-image.has-interactive { max-width: 420px; }
-  .stack-svg .side-label text { font-size: 11px; }
+  .stack-svg .side-label text { font-size: 22px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -948,14 +948,14 @@
   function buildLabels() {
     return LAYERS.map((layer, li) => {
       const tip = iso(0, PLANE, li); // left (front-left) tip of rhombus
-      const pillX = tip.x - 160;     // to the left of the tip
-      const pillY = tip.y - 16;
-      const pillW = 150;
-      const pillH = 32;
+      const pillW = 220;
+      const pillH = 52;
+      const pillX = tip.x - pillW - 16;   // to the left of the tip
+      const pillY = tip.y - pillH / 2;
       return `
         <g class="side-label" data-layer="${layer.id}">
-          <rect class="pill" x="${pillX}" y="${pillY}" width="${pillW}" height="${pillH}" rx="16"/>
-          <text x="${pillX + pillW / 2}" y="${pillY + pillH / 2 + 4.5}" text-anchor="middle">${layer.name}</text>
+          <rect class="pill" x="${pillX}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${pillH / 2}"/>
+          <text x="${pillX + pillW / 2}" y="${pillY + pillH / 2 + 8}" text-anchor="middle">${layer.name}</text>
           <!-- dashed leader from pill to tip -->
           <path class="leader" stroke-dasharray="3 3" d="M ${pillX + pillW + 4} ${pillY + pillH / 2} L ${tip.x - 6} ${tip.y}"/>
         </g>`;
