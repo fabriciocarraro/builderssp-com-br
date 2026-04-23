@@ -61,19 +61,19 @@
       <section class="stats-bar">
         <div class="container stats-grid">
           <div class="stat-item">
-            <span class="stat-number" data-count="15">0</span>
+            <span class="stat-number" data-count="99">0</span>
             <span class="stat-label">Open Models</span>
           </div>
           <div class="stat-item">
-            <span class="stat-number" data-count="40">0</span>
+            <span class="stat-number" data-count="136">0</span>
             <span class="stat-label">Datasets</span>
           </div>
           <div class="stat-item">
-            <span class="stat-number" data-count="8">0</span>
+            <span class="stat-number" data-count="24">0</span>
             <span class="stat-label">Benchmarks</span>
           </div>
           <div class="stat-item">
-            <span class="stat-number" data-count="12">0</span>
+            <span class="stat-number" data-count="35">0</span>
             <span class="stat-label">Languages Supported</span>
           </div>
         </div>
@@ -235,6 +235,9 @@
 
       <section class="resources-filters">
         <div class="container">
+          <div class="resources-search-wrapper">
+            <input type="text" class="resources-search" id="resources-search" placeholder="Search resources by name or description..." />
+          </div>
           <div class="filter-row">
             <div class="filter-group">
               <label class="filter-label">Resource Type</label>
@@ -254,10 +257,10 @@
                 <button class="chip" data-filter="speech">Speech</button>
                 <button class="chip" data-filter="translation">Machine Translation</button>
                 <button class="chip" data-filter="multimodal">Multimodal</button>
-                <button class="chip" data-filter="vision">Vision</button>
               </div>
             </div>
           </div>
+          <p class="resources-count" id="resources-count"></p>
         </div>
       </section>
 
@@ -267,6 +270,9 @@
             <!-- Populated by JS -->
           </div>
           <p class="no-results" id="no-results" style="display:none;">No resources match the selected filters.</p>
+          <div class="resources-show-more-wrapper">
+            <button type="button" class="btn btn-outline" id="resources-show-more" style="display:none;">Show more</button>
+          </div>
         </div>
       </section>
     </main>
