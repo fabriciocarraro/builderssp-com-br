@@ -1,0 +1,405 @@
+/* ======================================================
+   Interactive Layered Stack — Hero Replacement
+   CSS-3D isometric diagram, hover/click aware
+   ====================================================== */
+
+.stack-scene {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 1 / 1.25;
+  margin: 0 auto;
+  perspective: 2200px;
+  perspective-origin: 50% 40%;
+  user-select: none;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  overflow: visible;
+}
+
+.stack-world {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform:
+    rotateX(calc(58deg + var(--tilt-x)))
+    rotateZ(calc(-42deg + var(--tilt-y)));
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Each layer is an absolutely-positioned plane, stacked in Z via translateZ */
+.stack-layer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 62%;
+  height: 62%;
+  margin-left: -31%;
+  margin-top: -31%;
+  transform-style: preserve-3d;
+  transform: translateZ(var(--z, 0px));
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+  pointer-events: none;
+}
+.stack-plane, .stack-glyphs, .stack-label { pointer-events: auto; }
+
+.stack-plane {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      rgba(0, 26, 71, 0.06) 0deg 90deg,
+      rgba(244, 236, 214, 0.0) 90deg 180deg
+    );
+  background-size: 22px 22px;
+  background-color: rgba(244, 236, 214, 0.78);
+  border: 1px solid rgba(0, 26, 71, 0.25);
+  box-shadow:
+    0 2px 0 rgba(0, 26, 71, 0.08),
+    0 20px 40px -20px rgba(0, 0, 0, 0.4);
+  transition:
+    background-color 0.4s ease,
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+}
+
+.stack-layer[data-state="active"] .stack-plane {
+  background-color: rgba(244, 236, 214, 0.95);
+  border-color: var(--accent, #3fa678);
+  box-shadow:
+    0 0 0 2px rgba(63, 166, 120, 0.35),
+    0 24px 48px -16px rgba(63, 166, 120, 0.5);
+}
+
+.stack-layer[data-state="dim"] .stack-plane {
+  background-color: rgba(244, 236, 214, 0.35);
+  border-color: rgba(0, 26, 71, 0.15);
+}
+.stack-layer[data-state="dim"] .stack-glyphs {
+  opacity: 0.4;
+}
+
+/* Layer label — flat on the plane, counter-rotated so it reads upright */
+.stack-label {
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  transform: translate(-100%, -50%) translateZ(2px);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(244, 236, 214, 0.95);
+  border: 1px solid rgba(0, 26, 71, 0.25);
+  color: #001a47;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: all 0.35s ease;
+  pointer-events: none;
+}
+
+.stack-layer[data-state="active"] .stack-label {
+  background: var(--accent, #3fa678);
+  color: #fff;
+  border-color: var(--accent, #3fa678);
+  transform: translate(-100%, -50%) translateZ(2px) scale(1.05);
+}
+
+/* Count badge rides above the label on active */
+.stack-count {
+  position: absolute;
+  right: -2px;
+  top: 14%;
+  transform: translate(100%, -50%) translateZ(2px);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #001a47;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  opacity: 0;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+}
+
+.stack-layer[data-state="active"] .stack-count {
+  opacity: 1;
+  transform: translate(120%, -50%) translateZ(2px);
+}
+
+/* Glyphs container — sits on the plane */
+.stack-glyphs {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.4s ease;
+}
+
+.glyph {
+  position: absolute;
+  width: 22%;
+  height: 22%;
+  margin-left: -11%;
+  margin-top: -11%;
+  transform: translateZ(0);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
+}
+
+.glyph svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.stack-layer[data-state="active"] .glyph {
+  transform: translateZ(12px);
+}
+.stack-layer[data-state="active"] .glyph:nth-child(2n) {
+  transform: translateZ(18px);
+}
+.stack-layer[data-state="active"] .glyph:nth-child(3n) {
+  transform: translateZ(22px);
+}
+
+/* Iso glyph SVG stroke defaults */
+.glyph svg .stroke { stroke: #001a47; stroke-width: 1.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.glyph svg .fill { fill: rgba(244, 236, 214, 0.95); stroke: #001a47; stroke-width: 1.4; stroke-linejoin: round; }
+.glyph svg .accent { fill: rgba(63, 166, 120, 0.35); stroke: #001a47; stroke-width: 1.2; }
+
+/* Dashed connectors between adjacent layers */
+.stack-connector {
+  position: absolute;
+  width: 1px;
+  background: transparent;
+  border-left: 1.25px dashed rgba(0, 26, 71, 0.4);
+  left: var(--cx, 50%);
+  top: var(--cy, 50%);
+  height: var(--ch, 60px);
+  transform: translateZ(var(--cz, 0px));
+  opacity: 0.5;
+  transition: opacity 0.4s ease;
+}
+
+.stack-scene[data-flow="on"] .stack-connector {
+  opacity: 1;
+}
+
+/* Flowing dot travels along connector via CSS anim */
+.flow-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent, #3fa678);
+  box-shadow: 0 0 10px rgba(63, 166, 120, 0.8);
+  left: var(--cx, 50%);
+  top: var(--cy, 50%);
+  transform: translateZ(0);
+  opacity: 0;
+}
+
+.stack-scene[data-flow="on"] .flow-dot {
+  animation: flow-up var(--flow-dur, 2.6s) linear infinite;
+  animation-delay: var(--flow-delay, 0s);
+}
+
+@keyframes flow-up {
+  0%   { transform: translateZ(0px); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateZ(var(--flow-z, 500px)); opacity: 0; }
+}
+
+/* Tooltip panel — absolutely positioned over the scene, not inside 3D world */
+.stack-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  transform: translateX(-50%) translateY(100%);
+  min-width: 260px;
+  max-width: 320px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: rgba(244, 236, 214, 0.97);
+  color: #001a47;
+  border: 1px solid rgba(0, 26, 71, 0.2);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 5;
+}
+
+.stack-tooltip.open {
+  opacity: 1;
+  transform: translateX(-50%) translateY(100%) translateY(-4px);
+  pointer-events: auto;
+}
+
+.stack-tooltip-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.stack-tooltip-title h4 {
+  font-size: 0.95rem;
+  color: #001a47;
+  font-weight: 700;
+  margin: 0;
+}
+.stack-tooltip-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent, #3fa678);
+  color: #fff;
+}
+.stack-tooltip-desc {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #374151;
+  margin-bottom: 10px;
+}
+.stack-tooltip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.stack-tooltip-list span {
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 26, 71, 0.08);
+  color: #001a47;
+  border: 1px solid rgba(0, 26, 71, 0.1);
+}
+
+/* Legend under the stack — visible when nothing is selected */
+.stack-legend {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%) translateY(100%);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 500;
+  transition: opacity 0.3s ease;
+}
+.stack-legend::before,
+.stack-legend::after {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.25);
+}
+.stack-scene[data-hastooltip="1"] .stack-legend { opacity: 0; }
+
+/* Mode selector pills — small, bottom-right of hero */
+.stack-modes {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(0, 13, 26, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  z-index: 4;
+}
+.stack-mode-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: var(--font);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.stack-mode-btn:hover { color: #fff; }
+.stack-mode-btn[aria-pressed="true"] {
+  background: var(--accent, #3fa678);
+  color: #fff;
+}
+
+/* Hint text */
+.stack-hint {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stack-hint-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent, #3fa678);
+  animation: hint-pulse 1.8s ease-in-out infinite;
+}
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; box-shadow: 0 0 8px rgba(63, 166, 120, 0.6); }
+}
+
+/* Subtle idle float on every layer */
+@keyframes idle-float {
+  0%, 100% { translate: 0 0 0; }
+  50%      { translate: 0 -2px 0; }
+}
+
+.stack-layer {
+  animation: idle-float 6s ease-in-out infinite;
+}
+.stack-layer:nth-child(1) { animation-delay: 0s; }
+.stack-layer:nth-child(2) { animation-delay: 0.4s; }
+.stack-layer:nth-child(3) { animation-delay: 0.8s; }
+.stack-layer:nth-child(4) { animation-delay: 1.2s; }
+.stack-layer:nth-child(5) { animation-delay: 1.6s; }
+
+/* Exploded-view mode */
+.stack-scene[data-mode="exploded"] .stack-world {
+  transform:
+    rotateX(calc(56deg + var(--tilt-x)))
+    rotateZ(calc(-44deg + var(--tilt-y)))
+    scale(0.92);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .stack-scene { max-width: 420px; }
+  .stack-modes { top: 4px; }
+  .stack-hint { display: none; }
+}
+@media (max-width: 640px) {
+  .stack-scene { max-width: 340px; }
+}
+
+/* Hide the original static image when interactive stack is present */
+.hero-image.has-interactive > img { display: none; }
