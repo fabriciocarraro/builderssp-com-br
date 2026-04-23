@@ -134,14 +134,14 @@ h1, h2, h3, h4 {
 
 .btn-outline {
   background: transparent;
-  color: var(--primary-dark);
-  border: 1.5px solid rgba(0, 26, 71, 0.4);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.5);
 }
 
 .btn-outline:hover {
-  background: rgba(0, 26, 71, 0.06);
-  border-color: var(--primary-dark);
-  color: var(--primary-dark);
+  background: rgba(255,255,255,0.1);
+  border-color: #fff;
+  color: #fff;
 }
 
 .btn-lg {
@@ -322,7 +322,7 @@ h1, h2, h3, h4 {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: var(--accent-dark);
+  color: var(--accent);
   margin-bottom: 16px;
 }
 
@@ -331,13 +331,13 @@ h1, h2, h3, h4 {
   font-weight: 700;
   line-height: 1.1;
   margin-bottom: 20px;
-  color: var(--primary-dark);
+  color: #fff;
   letter-spacing: -0.5px;
 }
 
 .hero-subtitle {
   font-size: 1.1rem;
-  color: var(--text-700);
+  color: rgba(255,255,255,0.85);
   margin-bottom: 32px;
   max-width: 480px;
   line-height: 1.7;
@@ -828,7 +828,7 @@ h1, h2, h3, h4 {
   font-size: 1.8rem;
   text-align: center;
   margin-bottom: 60px;
-  color: var(--primary-dark);
+  color: #fff;
 }
 
 .timeline {
