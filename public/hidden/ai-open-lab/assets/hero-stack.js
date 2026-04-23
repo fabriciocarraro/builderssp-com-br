@@ -755,7 +755,7 @@
       desc: 'End-user surfaces — IDE plugins, APIs, playgrounds and CLI wrappers.',
       items: ['Aina Kit', 'ALIA Kit', 'Playground', 'REST API', 'CLI', 'SDK'],
       objects: [
-        { kind: 'browserWin1', gx: 22, gy: 40, w: 12, h: 12 },   // left
+        { kind: 'browserWin1', gx: 14, gy: 46, w: 12, h: 12 },   // left
         { kind: 'apiGlobe',    gx: 31, gy: 31, w: 14, h: 12 },   // center
         { kind: 'laptop',      gx: 40, gy: 22, w: 14, h: 10 },   // right
       ],
@@ -768,9 +768,9 @@
       desc: 'Evaluation suites across tasks, languages and fairness dimensions.',
       items: ['LinguaBench', 'SpeechBench', 'VisionEval', 'TranslatEval'],
       objects: [
-        { kind: 'lineChart',   gx: 22, gy: 40, w: 12, h: 10 },   // left
+        { kind: 'lineChart',   gx: 14, gy: 46, w: 12, h: 10 },   // left
         { kind: 'scoreboard',  gx: 31, gy: 31, w: 16, h: 14 },   // center
-        { kind: 'clipboard',   gx: 42, gy: 22, w: 10, h: 12 },   // right
+        { kind: 'clipboard',   gx: 46, gy: 14, w: 10, h: 12 },   // right
       ],
       links: [[0, 1], [1, 2]],
     },
@@ -781,9 +781,9 @@
       desc: 'Open language, speech, vision and multimodal models — trained in public.',
       items: ['ALIA 40B', 'ALIA 7B', 'Aina-MT', 'Whisper-cat', 'Vision-OC'],
       objects: [
-        { kind: 'neuralNet',        gx: 22, gy: 40, w: 12, h: 12 },   // left
+        { kind: 'neuralNet',        gx: 14, gy: 46, w: 12, h: 12 },   // left
         { kind: 'transformerStack', gx: 31, gy: 31, w: 14, h: 16 },   // center
-        { kind: 'algorithmFlow',    gx: 42, gy: 22, w: 12, h: 14 },   // right
+        { kind: 'algorithmFlow',    gx: 46, gy: 14, w: 12, h: 14 },   // right
       ],
       links: [[0, 1], [1, 2]],
     },
@@ -794,9 +794,9 @@
       desc: 'Curated open corpora across text, speech, translation and multimodal data.',
       items: ['Aina Speech', 'Multilingual MT Set', 'MultiModal Commons', 'Visual Scenes', 'Parallel Corpora'],
       objects: [
-        { kind: 'dbStack',     gx: 22, gy: 40, w: 14, h: 10 },   // left
+        { kind: 'dbStack',     gx: 14, gy: 46, w: 14, h: 10 },   // left
         { kind: 'dataLake',    gx: 31, gy: 31, w: 14, h: 12 },   // center
-        { kind: 'textDocs',    gx: 42, gy: 22, w: 12, h: 12 },   // right
+        { kind: 'textDocs',    gx: 46, gy: 14, w: 12, h: 12 },   // right
       ],
       links: [[0, 1], [1, 2]],
     },
@@ -807,9 +807,9 @@
       desc: 'Public supercomputing — GPU & TPU clusters, storage, networking run by BSC-CNS.',
       items: ['MareNostrum 5', 'GPU Nodes', 'TPU Pods', 'Storage', 'Interconnect'],
       objects: [
-        { kind: 'serverRacks', gx: 22, gy: 40, w: 14, h: 14 },   // left
+        { kind: 'serverRacks', gx: 14, gy: 46, w: 14, h: 14 },   // left
         { kind: 'tpuCard',     gx: 31, gy: 31, w: 16, h: 10 },   // center
-        { kind: 'cableLoop',   gx: 42, gy: 22, w: 14, h: 10 },   // right
+        { kind: 'cableLoop',   gx: 46, gy: 14, w: 14, h: 10 },   // right
       ],
       links: [[0, 1], [1, 2]],
     },
