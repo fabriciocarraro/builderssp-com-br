@@ -744,6 +744,11 @@
      ------------------------------------------------------------------ */
 
   const LAYERS = [
+    // Layout strategy: PLANE is 62 x 62 in grid units. We spread items
+    // across the rhombus by varying (gx + gy) for front/back depth and
+    // (gx − gy) for left/right. Keep items ~8+ units from each edge and
+    // ~22+ units apart measured by iso(gx,gy) distance so they don't
+    // overlap. Fewer items per layer = cleaner reading.
     {
       id: 'apps',
       name: 'Apps & Tools',
@@ -751,17 +756,15 @@
       desc: 'End-user surfaces — IDE plugins, APIs, playgrounds and CLI wrappers.',
       items: ['Aina Kit', 'ALIA Kit', 'Playground', 'REST API', 'CLI', 'SDK'],
       objects: [
-        // gx, gy are the center of the illustration in grid coords
-        { kind: 'appIcon',     gx: 16, gy: 28, w: 14, h: 14 },
-        { kind: 'browserWin1', gx: 28, gy: 10, w: 18, h: 16 },
-        { kind: 'browserWin2', gx: 36, gy: 18, w: 20, h: 16 },
-        { kind: 'gearStack',   gx: 22, gy: 40, w: 18, h: 16 },
-        { kind: 'apiGlobe',    gx: 34, gy: 32, w: 20, h: 18 },
-        { kind: 'laptop',      gx: 46, gy: 30, w: 22, h: 16 },
-        { kind: 'searchCard',  gx: 50, gy: 18, w: 20, h: 18 },
+        // Across the rhombus: app icon (left), browser (back), API (mid), laptop (front), search (right)
+        { kind: 'appIcon',     gx: 16, gy: 46, w: 14, h: 14 },   // left tip area
+        { kind: 'browserWin1', gx: 30, gy: 14, w: 20, h: 16 },   // back area
+        { kind: 'apiGlobe',    gx: 34, gy: 32, w: 20, h: 16 },   // center
+        { kind: 'laptop',      gx: 48, gy: 44, w: 22, h: 14 },   // front-right
+        { kind: 'searchCard',  gx: 50, gy: 20, w: 18, h: 16 },   // right tip area
       ],
       links: [
-        [0, 3], [3, 4], [4, 5], [5, 6], [4, 6]
+        [0, 2], [1, 2], [2, 3], [2, 4]
       ],
     },
     {
@@ -771,14 +774,14 @@
       desc: 'Evaluation suites across tasks, languages and fairness dimensions.',
       items: ['LinguaBench', 'SpeechBench', 'VisionEval', 'TranslatEval'],
       objects: [
-        { kind: 'lineChart',      gx: 18, gy: 22, w: 18, h: 14 },
-        { kind: 'lineChartCurve', gx: 28, gy: 34, w: 18, h: 14 },
-        { kind: 'barChart',       gx: 36, gy: 24, w: 16, h: 16 },
-        { kind: 'clipboard',      gx: 50, gy: 20, w: 14, h: 18 },
-        { kind: 'scoreboard',     gx: 42, gy: 40, w: 24, h: 20 },
+        { kind: 'lineChart',      gx: 18, gy: 30, w: 18, h: 14 },   // left-mid
+        { kind: 'barChart',       gx: 32, gy: 18, w: 16, h: 16 },   // back
+        { kind: 'clipboard',      gx: 48, gy: 18, w: 14, h: 16 },   // right-back
+        { kind: 'scoreboard',     gx: 36, gy: 44, w: 22, h: 18 },   // front-center
+        { kind: 'lineChartCurve', gx: 50, gy: 38, w: 18, h: 14 },   // front-right
       ],
       links: [
-        [0, 2], [1, 2], [2, 4], [4, 3]
+        [0, 3], [1, 3], [3, 4], [2, 4]
       ],
     },
     {
@@ -788,14 +791,14 @@
       desc: 'Open language, speech, vision and multimodal models — trained in public.',
       items: ['ALIA 40B', 'ALIA 7B', 'Aina-MT', 'Whisper-cat', 'Vision-OC'],
       objects: [
-        { kind: 'neuralNet',        gx: 18, gy: 24, w: 18, h: 16 },
-        { kind: 'cnnRnnNet',        gx: 26, gy: 42, w: 20, h: 18 },
-        { kind: 'transformerStack', gx: 40, gy: 32, w: 18, h: 22 },
-        { kind: 'trainingFlow',     gx: 48, gy: 44, w: 22, h: 16 },
-        { kind: 'algorithmFlow',    gx: 52, gy: 22, w: 16, h: 20 },
+        { kind: 'neuralNet',        gx: 16, gy: 32, w: 18, h: 16 },   // left
+        { kind: 'cnnRnnNet',        gx: 28, gy: 46, w: 20, h: 16 },   // front-left
+        { kind: 'transformerStack', gx: 36, gy: 22, w: 18, h: 22 },   // back-center
+        { kind: 'algorithmFlow',    gx: 50, gy: 18, w: 18, h: 20 },   // back-right
+        { kind: 'trainingFlow',     gx: 50, gy: 42, w: 22, h: 16 },   // front-right
       ],
       links: [
-        [0, 1], [1, 2], [2, 3], [2, 4]
+        [0, 2], [1, 2], [2, 3], [2, 4]
       ],
     },
     {
@@ -805,14 +808,14 @@
       desc: 'Curated open corpora across text, speech, translation and multimodal data.',
       items: ['Aina Speech', 'Multilingual MT Set', 'MultiModal Commons', 'Visual Scenes', 'Parallel Corpora'],
       objects: [
-        { kind: 'dbStack',      gx: 16, gy: 28, w: 20, h: 16 },
-        { kind: 'dataLake',     gx: 30, gy: 42, w: 22, h: 16 },
-        { kind: 'imageTiles',   gx: 42, gy: 34, w: 18, h: 18 },
-        { kind: 'textDocs',     gx: 40, gy: 18, w: 20, h: 18 },
-        { kind: 'spreadsheet',  gx: 52, gy: 34, w: 20, h: 16 },
+        { kind: 'dbStack',      gx: 16, gy: 30, w: 20, h: 16 },   // left
+        { kind: 'textDocs',     gx: 30, gy: 14, w: 20, h: 16 },   // back-left
+        { kind: 'dataLake',     gx: 28, gy: 44, w: 22, h: 14 },   // front-left
+        { kind: 'imageTiles',   gx: 44, gy: 30, w: 18, h: 18 },   // center
+        { kind: 'spreadsheet',  gx: 50, gy: 44, w: 20, h: 14 },   // right
       ],
       links: [
-        [0, 1], [1, 2], [2, 4], [3, 2]
+        [0, 2], [1, 3], [2, 3], [3, 4]
       ],
     },
     {
@@ -822,14 +825,14 @@
       desc: 'Public supercomputing — GPU & TPU clusters, storage, networking run by BSC-CNS.',
       items: ['MareNostrum 5', 'GPU Nodes', 'TPU Pods', 'Storage', 'Interconnect'],
       objects: [
-        { kind: 'serverRacks',  gx: 16, gy: 30, w: 22, h: 20 },
-        { kind: 'serverNodes',  gx: 30, gy: 42, w: 20, h: 18 },
-        { kind: 'tpuCard',      gx: 50, gy: 22, w: 22, h: 14 },
-        { kind: 'cableShort',   gx: 36, gy: 18, w: 20, h: 14 },
-        { kind: 'cableLoop',    gx: 54, gy: 40, w: 22, h: 16 },
+        { kind: 'serverRacks',  gx: 18, gy: 32, w: 22, h: 20 },   // left
+        { kind: 'serverNodes',  gx: 30, gy: 46, w: 20, h: 16 },   // front-left
+        { kind: 'cableShort',   gx: 36, gy: 16, w: 20, h: 12 },   // back
+        { kind: 'cableLoop',    gx: 50, gy: 42, w: 22, h: 14 },   // front-right
+        { kind: 'tpuCard',      gx: 50, gy: 22, w: 22, h: 12 },   // back-right
       ],
       links: [
-        [0, 1], [1, 3], [3, 2], [2, 4]
+        [0, 1], [0, 2], [2, 4], [4, 3]
       ],
     },
   ];
@@ -867,26 +870,26 @@
     return parts.join(' ');
   }
 
-  // Place a symbol on a plane. The symbol is rendered via a nested <svg>
-  // that has its own viewBox, positioned at `iso(gx, gy, li)` (top-left of
-  // the footprint) and scaled so its local viewBox fits into w × h grid units.
+  // Place a symbol on a plane. The symbol has its own viewBox and renders
+  // inside a bounding rect sized to fit the w × h grid footprint PLUS
+  // vertical headroom for the illustration's 3D height (items stand above
+  // the plane in screen space, so they need room above their base).
   function placeSymbol(kind, gx, gy, w, h, li) {
-    // Compute screen position of the "footprint center" and the footprint
-    // size in screen units. Use a bounding rectangle in screen space that
-    // spans the four isometric corners of the w×h footprint, so the symbol's
-    // SVG viewBox can fit inside.
     const ctr = iso(gx, gy, li);
-    const half = iso(w / 2, h / 2, li);
-    const dx = half.x - iso(0, 0, li).x;
-    const dy = half.y - iso(0, 0, li).y;
-    const halfW = Math.abs(w * IX + h * IX) / 2;
-    const halfH = Math.abs((w + h) * IY) / 2;
-    const screenW = halfW * 2;
-    const screenH = halfH * 2 + 40; // extra headroom so tall items aren't clipped
-    const x = ctr.x - screenW / 2;
-    const y = ctr.y - screenH / 2 + dy; // shift so visual center aligns with iso center
+    // Iso footprint bounding box in screen units.
+    // Max horizontal extent from center = (w + h) / 2 * IX  (at left/right tips)
+    // Max vertical extent from center   = (w + h) / 2 * IY  (at front/back tips)
+    const boxW = (w + h) * IX;
+    const boxH = (w + h) * IY;
+    // Headroom above footprint for illustrations that stand up from the plane.
+    // Empirically ~ boxW / 2 gives a pleasing 3:2 aspect for most items.
+    const headroom = boxW * 0.55;
+    const totalW = boxW;
+    const totalH = boxH + headroom;
+    const x = ctr.x - totalW / 2;
+    const y = ctr.y - headroom - boxH / 2;   // anchor base of illustration near iso center
 
-    return `<svg x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${screenW.toFixed(1)}" height="${screenH.toFixed(1)}" overflow="visible">
+    return `<svg x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${totalW.toFixed(1)}" height="${totalH.toFixed(1)}" overflow="visible">
               <use href="#sym-${kind}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/>
             </svg>`;
   }
