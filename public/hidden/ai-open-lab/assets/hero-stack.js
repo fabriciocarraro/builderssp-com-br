@@ -977,9 +977,27 @@
     return rail(lx, leftTop.y - 20, leftBot.y + 20) + rail(rx, rightTop.y - 20, rightBot.y + 20);
   }
 
+  // Presentation-attribute substitution.
+  // Our symbols were authored with short class names (s / f / a) but those
+  // don't reliably reach inside <use> shadow DOM. Before rendering, rewrite
+  // them to concrete fill/stroke presentation attributes. SVG presentation
+  // attributes DO inherit through <use> shadow DOM.
+  function inkify(svgString) {
+    return svgString
+      // Stroke-only lines: class="s"
+      .replace(/class="s"/g,
+        'fill="none" stroke="var(--ink)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"')
+      // Filled shapes (cream body, ink outline)
+      .replace(/class="f"/g,
+        'fill="var(--fill-strong)" stroke="var(--ink)" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"')
+      // Accent-filled shapes (warm beige, ink outline)
+      .replace(/class="a"/g,
+        'fill="var(--accent)" stroke="var(--ink)" stroke-width="1.3" stroke-linejoin="round"');
+  }
+
   // Build the whole SVG string
   function buildSVG() {
-    const symbols = Object.values(SYMBOLS).join('');
+    const symbols = inkify(Object.values(SYMBOLS).join(''));
     const layers = LAYERS.map(buildLayer).join('');
     const rails = buildVerticalRails();
     const labels = buildLabels();
