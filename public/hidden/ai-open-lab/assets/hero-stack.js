@@ -123,24 +123,6 @@
     scene.setAttribute('data-mode', 'stack');
     scene.setAttribute('data-flow', 'off');
 
-    // Mode pills
-    const modes = document.createElement('div');
-    modes.className = 'stack-modes';
-    [
-      { id: 'stack',    label: 'Stack' },
-      { id: 'exploded', label: 'Exploded' },
-      { id: 'flow',     label: 'Flow' },
-    ].forEach((m, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'stack-mode-btn';
-      btn.type = 'button';
-      btn.textContent = m.label;
-      btn.dataset.mode = m.id;
-      btn.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
-      modes.appendChild(btn);
-    });
-    scene.appendChild(modes);
-
     // Hint text
     const hint = document.createElement('div');
     hint.className = 'stack-hint';
@@ -216,12 +198,12 @@
     scene.appendChild(legend);
 
     host.appendChild(scene);
-    return { scene, world, modes };
+    return { scene, world };
   }
 
   /* ---------- Interactions ---------- */
 
-  function wireInteractions({ scene, world, modes }) {
+  function wireInteractions({ scene, world }) {
     const layerEls = scene.querySelectorAll('.stack-layer');
     let activeId = null;
     let pinned = false;
@@ -268,7 +250,6 @@
     // Click outside the layers (but inside scene) deselects
     scene.addEventListener('click', (e) => {
       if (e.target.closest('.stack-layer')) return;
-      if (e.target.closest('.stack-mode-btn')) return;
       pinned = false;
       setState(null);
     });
@@ -301,24 +282,6 @@
       }
     }
 
-    // Mode buttons
-    modes.addEventListener('click', (e) => {
-      const btn = e.target.closest('.stack-mode-btn');
-      if (!btn) return;
-      const mode = btn.dataset.mode;
-      modes.querySelectorAll('.stack-mode-btn').forEach(b =>
-        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false')
-      );
-      scene.setAttribute('data-mode', mode);
-      scene.setAttribute('data-flow', mode === 'flow' ? 'on' : 'off');
-
-      // Re-apply per-mode Z spread
-      const spread = mode === 'exploded' ? 1.55 : 1.0;
-      layerEls.forEach((el, i) => {
-        const base = LAYERS[i].z;
-        el.style.setProperty('--z', (base * spread) + 'px');
-      });
-    });
   }
 
   /* ---------- Boot ---------- */
