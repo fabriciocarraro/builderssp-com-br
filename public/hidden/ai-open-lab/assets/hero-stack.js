@@ -123,28 +123,16 @@
 
     // API window with globe
     apiGlobe: `
-      <symbol id="sym-apiGlobe" viewBox="0 0 120 100">
-        <rect class="f" x="10" y="12" width="80" height="60" rx="3"/>
-        <line class="s" x1="10" y1="22" x2="90" y2="22"/>
-        <circle class="a" cx="17" cy="17" r="1.4"/>
-        <circle class="a" cx="23" cy="17" r="1.4"/>
+      <symbol id="sym-apiGlobe" viewBox="0 0 100 100">
+        <rect class="f" x="10" y="20" width="80" height="60" rx="3"/>
+        <line class="s" x1="10" y1="32" x2="90" y2="32"/>
+        <circle class="a" cx="18" cy="26" r="1.8"/>
+        <circle class="a" cx="25" cy="26" r="1.8"/>
+        <circle class="a" cx="32" cy="26" r="1.8"/>
         <!-- API text pill -->
-        <rect class="a" x="22" y="32" width="46" height="16" rx="2"/>
-        <text x="45" y="43.5" text-anchor="middle" font-family="'Urbanist', sans-serif"
-              font-size="11" font-weight="700" fill="var(--ink)" font-style="italic">&lt;API&gt;</text>
-        <!-- Globe -->
-        <g transform="translate(78 62)">
-          <circle class="f" r="22"/>
-          <g class="s" fill="none" stroke-width="1.4">
-            <line x1="-22" y1="0" x2="22" y2="0"/>
-            <line x1="0" y1="-22" x2="0" y2="22"/>
-            <path d="M-22 0 Q -16 -14 0 -22 Q 16 -14 22 0 Q 16 14 0 22 Q -16 14 -22 0 Z"/>
-            <path d="M-20 -8 Q 0 0 20 -8"/>
-            <path d="M-20 8 Q 0 0 20 8"/>
-            <path d="M-8 -20 Q 0 0 -8 20"/>
-            <path d="M8 -20 Q 0 0 8 20"/>
-          </g>
-        </g>
+        <rect class="a" x="26" y="46" width="48" height="20" rx="3"/>
+        <text x="50" y="60" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="13" font-weight="700" fill="var(--ink)" font-style="italic">&lt;API&gt;</text>
       </symbol>`,
 
     // Laptop (iso projection)
@@ -296,19 +284,13 @@
         <!-- Middle section (two faces) -->
         <path class="a" d="M20 54 L20 70 L80 96 L80 80 Z"/>
         <path class="s" d="M20 54 L20 70 L80 96 L80 80 Z" fill="none"/>
-        <text x="46" y="82" text-anchor="middle" font-family="'Urbanist', sans-serif"
-              font-size="11" font-weight="700" fill="var(--ink)">Accuracy</text>
         <path class="a" d="M140 54 L140 70 L80 96 L80 80 Z"/>
         <path class="s" d="M140 54 L140 70 L80 96 L80 80 Z" fill="none"/>
-        <text x="112" y="82" text-anchor="middle" font-family="'Urbanist', sans-serif"
-              font-size="11" font-weight="700" fill="var(--ink)">Precision</text>
         <!-- Bottom strip -->
         <path class="a" d="M20 70 L20 82 L80 108 L80 96 Z"/>
         <path class="s" d="M20 70 L20 82 L80 108 L80 96 Z" fill="none"/>
         <path class="a" d="M140 70 L140 82 L80 108 L80 96 Z"/>
         <path class="s" d="M140 70 L140 82 L80 108 L80 96 Z" fill="none"/>
-        <text x="80" y="104" text-anchor="middle" font-family="'Urbanist', sans-serif"
-              font-size="11" font-weight="700" fill="var(--ink)">Recall</text>
       </symbol>`,
 
     // Leaderboard (iso block, "Scoreboards" label, row bars)
@@ -731,6 +713,63 @@
         <path class="a" d="M136 48 L158 34 L172 40 L150 54 Z"/>
         <path class="s" d="M136 48 L158 34 L172 40 L150 54 Z" fill="none"/>
       </symbol>`,
+
+    // GPU / chip on an iso platform
+    gpuChip: `
+      <symbol id="sym-gpuChip" viewBox="0 0 140 110">
+        <!-- iso base (socket) -->
+        <path class="f" d="M20 60 L70 32 L120 60 L70 88 Z"/>
+        <!-- left side face -->
+        <path class="a" d="M20 60 L20 72 L70 100 L70 88 Z"/>
+        <!-- right side face -->
+        <path class="a" d="M120 60 L120 72 L70 100 L70 88 Z"/>
+        <!-- chip on top -->
+        <path class="a" d="M46 60 L70 46 L94 60 L70 74 Z"/>
+        <path class="s" d="M46 60 L70 46 L94 60 L70 74 Z" fill="none"/>
+        <!-- chip grid lines -->
+        <g class="s" fill="none" stroke-width="0.8">
+          <line x1="55" y1="55" x2="79" y2="69"/>
+          <line x1="64" y1="50" x2="88" y2="64"/>
+          <line x1="61" y1="67" x2="85" y2="53"/>
+          <line x1="52" y1="62" x2="76" y2="48"/>
+        </g>
+        <!-- pins along the base edge -->
+        <g class="s" fill="none" stroke-width="1.2">
+          <line x1="34" y1="63" x2="34" y2="70"/>
+          <line x1="44" y1="58" x2="44" y2="65"/>
+          <line x1="96" y1="58" x2="96" y2="65"/>
+          <line x1="106" y1="63" x2="106" y2="70"/>
+        </g>
+      </symbol>`,
+
+    // Storage disk array — stacked storage trays in iso
+    storageArray: `
+      <symbol id="sym-storageArray" viewBox="0 0 140 110">
+        <!-- three stacked iso trays -->
+        <g>
+          <path class="f" d="M18 78 L70 52 L122 78 L70 104 Z"/>
+          <path class="s" d="M18 78 L70 52 L122 78 L70 104 Z" fill="none"/>
+          <circle class="a" cx="44" cy="75" r="2.2"/>
+          <rect class="a" x="54" y="68" width="30" height="4" rx="1" transform="skewX(-28) translate(22 36)"/>
+        </g>
+        <g>
+          <path class="f" d="M18 60 L70 34 L122 60 L70 86 Z"/>
+          <path class="s" d="M18 60 L70 34 L122 60 L70 86 Z" fill="none"/>
+          <circle class="a" cx="44" cy="57" r="2.2"/>
+          <rect class="a" x="54" y="50" width="30" height="4" rx="1" transform="skewX(-28) translate(22 28)"/>
+        </g>
+        <g>
+          <path class="f" d="M18 42 L70 16 L122 42 L70 68 Z"/>
+          <path class="s" d="M18 42 L70 16 L122 42 L70 68 Z" fill="none"/>
+          <circle class="a" cx="44" cy="39" r="2.2"/>
+          <rect class="a" x="54" y="32" width="30" height="4" rx="1" transform="skewX(-28) translate(22 18)"/>
+        </g>
+        <!-- side verticals showing depth -->
+        <g class="s" fill="none" stroke-width="1.2">
+          <line x1="18" y1="42" x2="18" y2="78"/>
+          <line x1="122" y1="42" x2="122" y2="78"/>
+        </g>
+      </symbol>`,
   };
 
   /* ------------------------------------------------------------------
@@ -757,7 +796,7 @@
       objects: [
         { kind: 'browserWin1', gx: 14, gy: 46, w: 12, h: 12 },   // left
         { kind: 'apiGlobe',    gx: 31, gy: 31, w: 14, h: 12 },   // center
-        { kind: 'laptop',      gx: 40, gy: 22, w: 14, h: 10 },   // right
+        { kind: 'laptop',      gx: 48, gy: 14, w: 14, h: 10 },   // right
       ],
       links: [[0, 1], [1, 2]],
     },
@@ -795,7 +834,7 @@
       items: ['Aina Speech', 'Multilingual MT Set', 'MultiModal Commons', 'Visual Scenes', 'Parallel Corpora'],
       objects: [
         { kind: 'dbStack',     gx: 14, gy: 46, w: 14, h: 10 },   // left
-        { kind: 'dataLake',    gx: 31, gy: 31, w: 14, h: 12 },   // center
+        { kind: 'spreadsheet', gx: 31, gy: 31, w: 14, h: 12 },   // center
         { kind: 'textDocs',    gx: 46, gy: 14, w: 12, h: 12 },   // right
       ],
       links: [[0, 1], [1, 2]],
@@ -808,8 +847,8 @@
       items: ['MareNostrum 5', 'GPU Nodes', 'TPU Pods', 'Storage', 'Interconnect'],
       objects: [
         { kind: 'serverRacks', gx: 14, gy: 46, w: 14, h: 14 },   // left
-        { kind: 'tpuCard',     gx: 31, gy: 31, w: 16, h: 10 },   // center
-        { kind: 'cableLoop',   gx: 46, gy: 14, w: 14, h: 10 },   // right
+        { kind: 'gpuChip',     gx: 31, gy: 31, w: 14, h: 12 },   // center
+        { kind: 'storageArray',gx: 46, gy: 14, w: 12, h: 12 },   // right
       ],
       links: [[0, 1], [1, 2]],
     },
