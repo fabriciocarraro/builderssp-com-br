@@ -1,782 +1,1071 @@
 /* ======================================================
-   Interactive Hero Stack — v3, faithful to reference image
-   CSS-3D isometric diagram of the public-AI resource stack.
+   Interactive Hero Stack — v4
+   One flat isometric SVG, authored with true projection.
+   Replaces the CSS-3D approach entirely.
    ====================================================== */
 
 (function () {
   'use strict';
 
-  /* ---------- Isometric SVG illustration library ----------
-     Each drawing uses a shared cream/ink palette and a viewBox
-     of 0 0 100 100. Stroke uses class "s", fill cream "f",
-     accent beige fill "a". The palette is set in CSS. */
+  /* ------------------------------------------------------------------
+     ISOMETRIC PROJECTION
+     Grid space (gx, gy) -> screen (sx, sy).
+     Shallow 20° isometric (matches the reference's squashed rhombus).
+     ------------------------------------------------------------------ */
 
-  const G = {
-    /* === APPS & TOOLS === */
+  const ISO_ANGLE_DEG = 20;
+  const ISO_COS = Math.cos(ISO_ANGLE_DEG * Math.PI / 180);   // ~0.9397
+  const ISO_SIN = Math.sin(ISO_ANGLE_DEG * Math.PI / 180);   // ~0.3420
 
-    // Browser window with code snippet
-    browserCode: `<svg viewBox="0 0 100 100">
-      <!-- back window -->
-      <path class="f" d="M18 22 L78 22 L78 58 L18 58 Z"/>
-      <path class="s" d="M18 22 L78 22 L78 58 L18 58 Z M18 30 L78 30"/>
-      <circle class="a" cx="23" cy="26" r="1.2"/><circle class="a" cx="28" cy="26" r="1.2"/><circle class="a" cx="33" cy="26" r="1.2"/>
-      <path class="s" d="M24 37 h30 M24 42 h22 M24 47 h26 M24 52 h18"/>
-      <!-- front window with code brackets -->
-      <path class="f" d="M40 42 L92 42 L92 80 L40 80 Z"/>
-      <path class="s" d="M40 42 L92 42 L92 80 L40 80 Z M40 50 L92 50"/>
-      <circle class="a" cx="45" cy="46" r="1.2"/><circle class="a" cx="50" cy="46" r="1.2"/>
-      <path class="s" d="M55 62 l-4 4 l4 4 M77 62 l4 4 l-4 4 M63 70 l6 -6"/>
-    </svg>`,
+  // Grid unit size in SVG units. Each grid cell projects to
+  // GRID * ISO_COS wide and GRID * ISO_SIN tall.
+  const GRID = 5.8;
+  const IX = GRID * ISO_COS;   // per-unit horizontal
+  const IY = GRID * ISO_SIN;   // per-unit vertical
 
-    // Browser window with UI
-    browserUI: `<svg viewBox="0 0 100 100">
-      <path class="f" d="M12 18 L86 18 L86 70 L12 70 Z"/>
-      <path class="s" d="M12 18 L86 18 L86 70 L12 70 Z M12 28 L86 28"/>
-      <circle class="a" cx="18" cy="23" r="1.3"/><circle class="a" cx="23" cy="23" r="1.3"/><circle class="a" cx="28" cy="23" r="1.3"/>
-      <rect class="a" x="17" y="35" width="20" height="28" rx="1"/>
-      <path class="s" d="M42 35 h38 M42 41 h30 M42 47 h34 M42 53 h24 M42 59 h30"/>
-    </svg>`,
+  // Scene layout
+  const SCENE_W = 1100;
+  const SCENE_H = 1440;
+  const CENTER_X = SCENE_W / 2;
+
+  // Plane: rhombus in grid space from (0,0) to (PLANE,PLANE),
+  // where (0,0) = back tip, (PLANE,0) = right tip,
+  // (PLANE,PLANE) = front tip, (0,PLANE) = left tip.
+  const PLANE = 62;
+
+  // Vertical offset (in SVG units) of each layer's "grid origin"
+  // (which is its back tip). Layers descend the page.
+  const LAYER_Y = [170, 350, 530, 710, 890];
+
+  // Project grid (gx, gy) on layer `li` to screen (sx, sy)
+  function iso(gx, gy, li) {
+    const sx = CENTER_X + (gx - gy) * IX;
+    const sy = LAYER_Y[li] + (gx + gy) * IY;
+    return { x: sx, y: sy };
+  }
+
+  // Short form: returns "x,y" string
+  function P(gx, gy, li) {
+    const p = iso(gx, gy, li);
+    return `${p.x.toFixed(2)},${p.y.toFixed(2)}`;
+  }
+
+  /* ------------------------------------------------------------------
+     ILLUSTRATION LIBRARY
+     Each illustration is a <symbol> drawn in its own local coordinate
+     system (0..100, 0..60 typical). We then <use> it at a grid
+     position, scaled to a given grid footprint.
+     Palette:
+       --ink   : dark stroke    (#e8efff on dark bg)
+       --fill  : cream fill     (rgba(255,252,244,0.92))
+       --accent: beige accent   (#c9b788)
+     Classes on paths:  s (stroke only), f (fill+stroke), a (accent+stroke)
+     ------------------------------------------------------------------ */
+
+  const SYMBOLS = {
+    /* ========================== APPS & TOOLS ========================== */
+
+    // App icon: rounded square containing a gear
+    appIcon: `
+      <symbol id="sym-appIcon" viewBox="0 0 100 100">
+        <rect class="f" x="14" y="18" width="72" height="72" rx="12" ry="12"/>
+        <g transform="translate(50 54)">
+          <circle class="a" r="16"/>
+          <circle class="f" r="6"/>
+          <g class="s" fill="none" stroke-width="2.2">
+            <path d="M0 -22 v6 M0 16 v6 M-22 0 h6 M16 0 h6
+                     M-15.5 -15.5 l4 4 M11.5 11.5 l4 4
+                     M-15.5 15.5 l4 -4 M11.5 -11.5 l4 -4"/>
+          </g>
+        </g>
+      </symbol>`,
+
+    // Browser window (split panel) — iso-faked with parallelogram shelf
+    browserWin1: `
+      <symbol id="sym-browserWin1" viewBox="0 0 120 100">
+        <rect class="f" x="10" y="18" width="100" height="70" rx="3"/>
+        <line class="s" x1="10" y1="30" x2="110" y2="30"/>
+        <circle class="a" cx="18" cy="24" r="1.8"/>
+        <circle class="a" cx="25" cy="24" r="1.8"/>
+        <circle class="a" cx="32" cy="24" r="1.8"/>
+        <rect class="a" x="18" y="38" width="32" height="42" rx="2"/>
+        <line class="s" x1="58" y1="42" x2="100" y2="42"/>
+        <line class="s" x1="58" y1="50" x2="96" y2="50"/>
+        <line class="s" x1="58" y1="58" x2="100" y2="58"/>
+        <line class="s" x1="58" y1="66" x2="88" y2="66"/>
+        <line class="s" x1="58" y1="74" x2="92" y2="74"/>
+      </symbol>`,
+
+    // Browser window with code symbol overlay
+    browserWin2: `
+      <symbol id="sym-browserWin2" viewBox="0 0 120 100">
+        <!-- back window -->
+        <rect class="f" x="8" y="12" width="78" height="56" rx="3"/>
+        <line class="s" x1="8" y1="22" x2="86" y2="22"/>
+        <circle class="a" cx="15" cy="17" r="1.4"/>
+        <circle class="a" cx="21" cy="17" r="1.4"/>
+        <circle class="a" cx="27" cy="17" r="1.4"/>
+        <line class="s" x1="16" y1="32" x2="78" y2="32"/>
+        <line class="s" x1="16" y1="40" x2="70" y2="40"/>
+        <line class="s" x1="16" y1="48" x2="78" y2="48"/>
+        <line class="s" x1="16" y1="56" x2="60" y2="56"/>
+        <!-- front window with </> -->
+        <rect class="f" x="54" y="36" width="56" height="52" rx="3"/>
+        <line class="s" x1="54" y1="46" x2="110" y2="46"/>
+        <circle class="a" cx="62" cy="41" r="1.4"/>
+        <circle class="a" cx="68" cy="41" r="1.4"/>
+        <g class="s" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M72 60 l-6 6 l6 6"/>
+          <path d="M92 60 l6 6 l-6 6"/>
+          <path d="M82 58 l-4 16"/>
+        </g>
+      </symbol>`,
 
     // API window with globe
-    apiGlobe: `<svg viewBox="0 0 100 100">
-      <path class="f" d="M8 20 L78 20 L78 62 L8 62 Z"/>
-      <path class="s" d="M8 20 L78 20 L78 62 L8 62 Z M8 28 L78 28"/>
-      <circle class="a" cx="14" cy="24" r="1.2"/><circle class="a" cx="19" cy="24" r="1.2"/>
-      <!-- API text area -->
-      <path class="a" d="M20 36 L38 36 L38 44 L20 44 Z"/>
-      <path class="s" d="M20 36 L38 36 L38 44 L20 44 Z"/>
-      <text x="29" y="42" text-anchor="middle" font-size="6" font-weight="700" fill="#001a47" font-family="monospace">&lt;API&gt;</text>
-      <!-- globe -->
-      <circle class="f" cx="55" cy="50" r="11"/>
-      <circle class="s" cx="55" cy="50" r="11" fill="none"/>
-      <path class="s" d="M44 50 h22 M55 39 v22 M46 44 q9 4 18 0 M46 56 q9 -4 18 0 M48 42 q7 16 0 16 M62 42 q-7 16 0 16" fill="none" stroke-width="0.8"/>
-    </svg>`,
+    apiGlobe: `
+      <symbol id="sym-apiGlobe" viewBox="0 0 120 100">
+        <rect class="f" x="10" y="12" width="80" height="60" rx="3"/>
+        <line class="s" x1="10" y1="22" x2="90" y2="22"/>
+        <circle class="a" cx="17" cy="17" r="1.4"/>
+        <circle class="a" cx="23" cy="17" r="1.4"/>
+        <!-- API text pill -->
+        <rect class="a" x="22" y="32" width="46" height="16" rx="2"/>
+        <text x="45" y="43.5" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)" font-style="italic">&lt;API&gt;</text>
+        <!-- Globe -->
+        <g transform="translate(78 62)">
+          <circle class="f" r="22"/>
+          <g class="s" fill="none" stroke-width="1.4">
+            <line x1="-22" y1="0" x2="22" y2="0"/>
+            <line x1="0" y1="-22" x2="0" y2="22"/>
+            <path d="M-22 0 Q -16 -14 0 -22 Q 16 -14 22 0 Q 16 14 0 22 Q -16 14 -22 0 Z"/>
+            <path d="M-20 -8 Q 0 0 20 -8"/>
+            <path d="M-20 8 Q 0 0 20 8"/>
+            <path d="M-8 -20 Q 0 0 -8 20"/>
+            <path d="M8 -20 Q 0 0 8 20"/>
+          </g>
+        </g>
+      </symbol>`,
 
-    // Laptop with terminal
-    laptop: `<svg viewBox="0 0 100 100">
-      <path class="f" d="M14 25 L80 25 L80 65 L14 65 Z"/>
-      <path class="s" d="M14 25 L80 25 L80 65 L14 65 Z"/>
-      <path class="a" d="M19 30 L75 30 L75 60 L19 60 Z"/>
-      <path class="s" d="M19 30 L75 30 L75 60 L19 60 Z"/>
-      <path class="s" stroke-width="1.3" d="M25 42 l4 3 l-4 3 M33 47 h8"/>
-      <!-- keyboard base -->
-      <path class="f" d="M6 65 L88 65 L82 75 L12 75 Z"/>
-      <path class="s" d="M6 65 L88 65 L82 75 L12 75 Z M42 70 h10"/>
-    </svg>`,
+    // Laptop (iso projection)
+    laptop: `
+      <symbol id="sym-laptop" viewBox="0 0 140 100">
+        <!-- screen back -->
+        <path class="f" d="M30 12 L110 12 L110 62 L30 62 Z"/>
+        <!-- screen interior -->
+        <path class="a" d="M36 18 L104 18 L104 56 L36 56 Z"/>
+        <g class="s" fill="none" stroke-width="2" stroke-linecap="round">
+          <path d="M44 32 l8 6 l-8 6"/>
+          <line x1="56" y1="40" x2="74" y2="40"/>
+        </g>
+        <!-- base (parallelogram) -->
+        <path class="f" d="M14 62 L126 62 L114 78 L26 78 Z"/>
+        <path class="s" d="M60 70 L80 70"/>
+      </symbol>`,
 
-    // Search / doc viewer card
-    searchDoc: `<svg viewBox="0 0 100 100">
-      <path class="f" d="M18 22 L78 22 L78 72 L18 72 Z"/>
-      <path class="s" d="M18 22 L78 22 L78 72 L18 72 Z"/>
-      <path class="a" d="M26 30 L72 30 L72 50 L26 50 Z"/>
-      <path class="s" d="M26 30 L72 30 L72 50 L26 50 Z"/>
-      <circle class="f" cx="36" cy="40" r="6"/>
-      <path class="s" d="M36 40 m-6 0 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0 M40 44 l5 5"/>
-      <path class="s" d="M26 56 h40 M26 62 h30 M26 68 h36"/>
-      <!-- code tag callout -->
-      <path class="a" d="M55 62 L76 62 L76 70 L55 70 Z"/>
-      <path class="s" d="M55 62 L76 62 L76 70 L55 70 Z"/>
-      <text x="65" y="68" text-anchor="middle" font-size="5" font-weight="700" fill="#001a47" font-family="monospace">&lt;/&gt;</text>
-    </svg>`,
+    // Search + code-snippet card
+    searchCard: `
+      <symbol id="sym-searchCard" viewBox="0 0 120 100">
+        <rect class="f" x="14" y="12" width="82" height="72" rx="4"/>
+        <!-- search bar -->
+        <rect class="a" x="22" y="22" width="66" height="22" rx="3"/>
+        <g class="s" fill="none" stroke-width="2">
+          <circle cx="32" cy="33" r="5"/>
+          <line x1="36" y1="37" x2="40" y2="41"/>
+        </g>
+        <line class="s" x1="46" y1="33" x2="82" y2="33"/>
+        <!-- result rows -->
+        <line class="s" x1="22" y1="54" x2="82" y2="54"/>
+        <line class="s" x1="22" y1="62" x2="72" y2="62"/>
+        <line class="s" x1="22" y1="70" x2="80" y2="70"/>
+        <line class="s" x1="22" y1="78" x2="66" y2="78"/>
+        <!-- </> badge -->
+        <g transform="translate(92 72)">
+          <rect class="a" x="0" y="0" width="26" height="20" rx="3"/>
+          <text x="13" y="14.5" text-anchor="middle" font-family="'Urbanist', sans-serif"
+                font-size="10" font-weight="700" fill="var(--ink)">&lt;/&gt;</text>
+        </g>
+      </symbol>`,
 
-    // App icon (rounded square with gear)
-    appIcon: `<svg viewBox="0 0 100 100">
-      <path class="f" d="M20 30 L72 30 L72 72 L20 72 Z" rx="6"/>
-      <path class="s" d="M20 36 a6 6 0 0 1 6 -6 L66 30 a6 6 0 0 1 6 6 L72 66 a6 6 0 0 1 -6 6 L26 72 a6 6 0 0 1 -6 -6 Z"/>
-      <g transform="translate(46 51)">
-        <circle class="a" cx="0" cy="0" r="8"/>
-        <circle class="f" cx="0" cy="0" r="3"/>
-        <path class="s" d="M0 -11 v3 M0 8 v3 M-11 0 h3 M8 0 h3 M-8 -8 l2 2 M6 6 l2 2 M-8 8 l2 -2 M6 -6 l2 -2" stroke-width="1"/>
-      </g>
-    </svg>`,
+    // Gear stack (gear on an iso platform)
+    gearStack: `
+      <symbol id="sym-gearStack" viewBox="0 0 120 100">
+        <!-- iso platform (top face) -->
+        <path class="f" d="M20 58 L60 38 L100 58 L60 78 Z"/>
+        <!-- left face -->
+        <path class="a" d="M20 58 L20 68 L60 88 L60 78 Z"/>
+        <!-- right face -->
+        <path class="a" d="M100 58 L100 68 L60 88 L60 78 Z"/>
+        <!-- gear on top -->
+        <g transform="translate(60 42)">
+          <circle class="a" r="16"/>
+          <circle class="f" r="6"/>
+          <g class="s" fill="none" stroke-width="2">
+            <path d="M0 -22 v6 M0 16 v6 M-22 0 h6 M16 0 h6
+                     M-15.5 -15.5 l4 4 M11.5 11.5 l4 4
+                     M-15.5 15.5 l4 -4 M11.5 -11.5 l4 -4"/>
+          </g>
+        </g>
+      </symbol>`,
 
-    // Gear stack (settings box)
-    gearStack: `<svg viewBox="0 0 100 100">
-      <!-- stacked platform -->
-      <path class="f" d="M24 48 L56 38 L88 48 L56 58 Z"/>
-      <path class="s" d="M24 48 L56 38 L88 48 L56 58 Z"/>
-      <path class="f" d="M24 48 L24 54 L56 64 L56 58 Z"/>
-      <path class="s" d="M24 48 L24 54 L56 64 L56 58 Z"/>
-      <path class="f" d="M88 48 L88 54 L56 64 L56 58 Z"/>
-      <path class="s" d="M88 48 L88 54 L56 64 L56 58 Z"/>
-      <!-- gear -->
-      <g transform="translate(56 34)">
-        <circle class="a" r="11"/>
-        <circle class="f" r="4.5"/>
-        <path class="s" d="M0 -14 v4 M0 10 v4 M-14 0 h4 M10 0 h4 M-10 -10 l3 3 M7 7 l3 3 M-10 10 l3 -3 M7 -7 l3 -3"/>
-      </g>
-    </svg>`,
+    /* ========================== BENCHMARKS ========================== */
 
-    /* === BENCHMARKS === */
+    // Line chart card
+    lineChart: `
+      <symbol id="sym-lineChart" viewBox="0 0 120 100">
+        <rect class="f" x="12" y="12" width="96" height="66" rx="3"/>
+        <g class="s" fill="none" stroke-width="1.2" stroke-dasharray="2 2">
+          <line x1="20" y1="28" x2="100" y2="28"/>
+          <line x1="20" y1="44" x2="100" y2="44"/>
+          <line x1="20" y1="60" x2="100" y2="60"/>
+        </g>
+        <path class="a" d="M20 66 L30 56 L44 60 L58 40 L72 48 L86 30 L100 40 L100 70 L20 70 Z"/>
+        <path class="s" fill="none" stroke-width="2"
+              d="M20 66 L30 56 L44 60 L58 40 L72 48 L86 30 L100 40"/>
+      </symbol>`,
 
-    // Line chart (area)
-    lineChart: `<svg viewBox="0 0 100 100">
-      <path class="f" d="M14 22 L84 22 L84 66 L14 66 Z"/>
-      <path class="s" d="M14 22 L84 22 L84 66 L14 66 Z"/>
-      <path class="a" d="M20 60 L30 45 L42 52 L55 32 L68 40 L80 28 L80 60 Z"/>
-      <path class="s" d="M20 60 L30 45 L42 52 L55 32 L68 40 L80 28" fill="none" stroke-width="1.3"/>
-      <path class="s" d="M20 30 L20 60 L80 60" fill="none" stroke-width="1"/>
-    </svg>`,
+    // Second line chart with smooth curve
+    lineChartCurve: `
+      <symbol id="sym-lineChartCurve" viewBox="0 0 120 100">
+        <rect class="f" x="12" y="12" width="96" height="66" rx="3"/>
+        <g class="s" fill="none" stroke-width="1.2" stroke-dasharray="2 2">
+          <line x1="20" y1="28" x2="100" y2="28"/>
+          <line x1="20" y1="44" x2="100" y2="44"/>
+          <line x1="20" y1="60" x2="100" y2="60"/>
+        </g>
+        <path class="a" d="M20 60 Q 36 26 52 52 Q 70 78 88 34 L100 44 L100 70 L20 70 Z"/>
+        <path class="s" fill="none" stroke-width="2"
+              d="M20 60 Q 36 26 52 52 Q 70 78 88 34 L100 44"/>
+      </symbol>`,
 
-    // Line chart (curve)
-    lineChartCurve: `<svg viewBox="0 0 100 100">
-      <path class="f" d="M14 22 L84 22 L84 66 L14 66 Z"/>
-      <path class="s" d="M14 22 L84 22 L84 66 L14 66 Z"/>
-      <path class="a" d="M20 58 Q 34 30 50 48 T 80 32 L80 60 L20 60 Z"/>
-      <path class="s" d="M20 58 Q 34 30 50 48 T 80 32" fill="none" stroke-width="1.3"/>
-      <path class="s" d="M20 30 L20 60 L80 60" fill="none" stroke-width="1"/>
-    </svg>`,
+    // Bar chart card
+    barChart: `
+      <symbol id="sym-barChart" viewBox="0 0 100 100">
+        <rect class="f" x="8" y="10" width="84" height="78" rx="3"/>
+        <line class="s" x1="14" y1="78" x2="86" y2="78" stroke-width="1.4"/>
+        <rect class="a" x="20" y="52" width="10" height="26"/>
+        <rect class="s" x="20" y="52" width="10" height="26" fill="none"/>
+        <rect class="a" x="34" y="38" width="10" height="40"/>
+        <rect class="s" x="34" y="38" width="10" height="40" fill="none"/>
+        <rect class="a" x="48" y="46" width="10" height="32"/>
+        <rect class="s" x="48" y="46" width="10" height="32" fill="none"/>
+        <rect class="a" x="62" y="26" width="10" height="52"/>
+        <rect class="s" x="62" y="26" width="10" height="52" fill="none"/>
+        <rect class="a" x="76" y="44" width="10" height="34"/>
+        <rect class="s" x="76" y="44" width="10" height="34" fill="none"/>
+      </symbol>`,
 
-    // Bar chart
-    barChart: `<svg viewBox="0 0 100 100">
-      <path class="f" d="M18 18 L80 18 L80 74 L18 74 Z"/>
-      <path class="s" d="M18 18 L80 18 L80 74 L18 74 Z"/>
-      <rect class="a" x="26" y="50" width="8" height="18"/>
-      <path class="s" d="M26 50 L34 50 L34 68 L26 68 Z" fill="none"/>
-      <rect class="a" x="38" y="38" width="8" height="30"/>
-      <path class="s" d="M38 38 L46 38 L46 68 L38 68 Z" fill="none"/>
-      <rect class="a" x="50" y="44" width="8" height="24"/>
-      <path class="s" d="M50 44 L58 44 L58 68 L50 68 Z" fill="none"/>
-      <rect class="a" x="62" y="30" width="8" height="38"/>
-      <path class="s" d="M62 30 L70 30 L70 68 L62 68 Z" fill="none"/>
-      <path class="s" d="M24 26 L72 26" stroke-width="0.8"/>
-    </svg>`,
+    // Clipboard with checkmarks
+    clipboard: `
+      <symbol id="sym-clipboard" viewBox="0 0 90 100">
+        <rect class="f" x="10" y="14" width="70" height="80" rx="3"/>
+        <rect class="a" x="28" y="6" width="34" height="16" rx="2"/>
+        <g>
+          <rect class="a" x="18" y="30" width="10" height="10"/>
+          <rect class="s" x="18" y="30" width="10" height="10" fill="none"/>
+          <path class="s" d="M20 35 l3 3 l5 -6" fill="none" stroke-width="2"/>
+          <line class="s" x1="32" y1="36" x2="72" y2="36" stroke-width="1.8"/>
+        </g>
+        <g>
+          <rect class="a" x="18" y="46" width="10" height="10"/>
+          <rect class="s" x="18" y="46" width="10" height="10" fill="none"/>
+          <path class="s" d="M20 51 l3 3 l5 -6" fill="none" stroke-width="2"/>
+          <line class="s" x1="32" y1="52" x2="72" y2="52" stroke-width="1.8"/>
+        </g>
+        <g>
+          <rect class="a" x="18" y="62" width="10" height="10"/>
+          <rect class="s" x="18" y="62" width="10" height="10" fill="none"/>
+          <line class="s" x1="32" y1="68" x2="72" y2="68" stroke-width="1.8"/>
+        </g>
+        <g>
+          <rect class="a" x="18" y="78" width="10" height="10"/>
+          <rect class="s" x="18" y="78" width="10" height="10" fill="none"/>
+          <path class="s" d="M20 83 l3 3 l5 -6" fill="none" stroke-width="2"/>
+          <line class="s" x1="32" y1="84" x2="72" y2="84" stroke-width="1.8"/>
+        </g>
+      </symbol>`,
 
-    // Checklist clipboard
-    clipboard: `<svg viewBox="0 0 100 100">
-      <path class="f" d="M28 18 L72 18 L72 82 L28 82 Z"/>
-      <path class="s" d="M28 18 L72 18 L72 82 L28 82 Z"/>
-      <path class="a" d="M38 12 L62 12 L62 22 L38 22 Z"/>
-      <path class="s" d="M38 12 L62 12 L62 22 L38 22 Z"/>
-      <rect class="a" x="34" y="32" width="6" height="6"/>
-      <path class="s" d="M34 32 h6 v6 h-6 z M36 35 l1.5 1.5 L40 32"/>
-      <path class="s" d="M44 36 h22" stroke-width="1.2"/>
-      <rect class="a" x="34" y="44" width="6" height="6"/>
-      <path class="s" d="M34 44 h6 v6 h-6 z M36 47 l1.5 1.5 L40 44"/>
-      <path class="s" d="M44 48 h22" stroke-width="1.2"/>
-      <rect class="a" x="34" y="56" width="6" height="6"/>
-      <path class="s" d="M34 56 h6 v6 h-6 z"/>
-      <path class="s" d="M44 60 h22" stroke-width="1.2"/>
-      <rect class="a" x="34" y="68" width="6" height="6"/>
-      <path class="s" d="M34 68 h6 v6 h-6 z M36 71 l1.5 1.5 L40 68"/>
-      <path class="s" d="M44 72 h22" stroke-width="1.2"/>
-    </svg>`,
+    // Scoreboard cube (iso)
+    scoreboard: `
+      <symbol id="sym-scoreboard" viewBox="0 0 160 120">
+        <!-- Top plane -->
+        <path class="a" d="M20 54 L80 28 L140 54 L80 80 Z"/>
+        <path class="s" d="M20 54 L80 28 L140 54 L80 80 Z" fill="none"/>
+        <text x="80" y="60" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-style="italic" font-size="13" font-weight="700" fill="var(--ink)">Scoreboards</text>
+        <!-- Middle section (two faces) -->
+        <path class="a" d="M20 54 L20 70 L80 96 L80 80 Z"/>
+        <path class="s" d="M20 54 L20 70 L80 96 L80 80 Z" fill="none"/>
+        <text x="46" y="82" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)">Accuracy</text>
+        <path class="a" d="M140 54 L140 70 L80 96 L80 80 Z"/>
+        <path class="s" d="M140 54 L140 70 L80 96 L80 80 Z" fill="none"/>
+        <text x="112" y="82" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)">Precision</text>
+        <!-- Bottom strip -->
+        <path class="a" d="M20 70 L20 82 L80 108 L80 96 Z"/>
+        <path class="s" d="M20 70 L20 82 L80 108 L80 96 Z" fill="none"/>
+        <path class="a" d="M140 70 L140 82 L80 108 L80 96 Z"/>
+        <path class="s" d="M140 70 L140 82 L80 108 L80 96 Z" fill="none"/>
+        <text x="80" y="104" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)">Recall</text>
+      </symbol>`,
 
-    // Scoreboard cube (Accuracy / Precision / Recall stack)
-    scoreboard: `<svg viewBox="0 0 100 100">
-      <!-- top -->
-      <path class="a" d="M22 40 L54 28 L86 40 L54 52 Z"/>
-      <path class="s" d="M22 40 L54 28 L86 40 L54 52 Z"/>
-      <text x="54" y="44" text-anchor="middle" font-size="6.5" font-weight="700" fill="#001a47" font-style="italic">Scoreboards</text>
-      <!-- middle -->
-      <path class="a" d="M22 40 L22 52 L54 64 L54 52 Z"/>
-      <path class="s" d="M22 40 L22 52 L54 64 L54 52 Z"/>
-      <path class="a" d="M86 40 L86 52 L54 64 L54 52 Z"/>
-      <path class="s" d="M86 40 L86 52 L54 64 L54 52 Z"/>
-      <text x="38" y="60" text-anchor="middle" font-size="5.5" font-weight="700" fill="#001a47">Accuracy</text>
-      <text x="70" y="60" text-anchor="middle" font-size="5.5" font-weight="700" fill="#001a47">Precision</text>
-      <!-- bottom layer -->
-      <path class="a" d="M22 52 L22 62 L54 74 L54 64 Z"/>
-      <path class="s" d="M22 52 L22 62 L54 74 L54 64 Z"/>
-      <path class="a" d="M86 52 L86 62 L54 74 L54 64 Z"/>
-      <path class="s" d="M86 52 L86 62 L54 74 L54 64 Z"/>
-      <text x="54" y="72" text-anchor="middle" font-size="5.5" font-weight="700" fill="#001a47">Recall</text>
-    </svg>`,
+    // Leaderboard (iso block, "Scoreboards" label, row bars)
+    leaderboard: `
+      <symbol id="sym-leaderboard" viewBox="0 0 140 120">
+        <!-- top face -->
+        <path class="f" d="M14 42 L74 14 L128 42 L68 70 Z"/>
+        <text x="56" y="44" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)">Scoreboards</text>
+        <!-- left face -->
+        <path class="a" d="M14 42 L14 84 L68 112 L68 70 Z"/>
+        <g class="s" fill="none" stroke-width="1.4" stroke-linecap="round">
+          <line x1="20" y1="54" x2="62" y2="78"/>
+          <line x1="20" y1="66" x2="62" y2="90"/>
+          <line x1="20" y1="78" x2="52" y2="96"/>
+          <line x1="20" y1="90" x2="58" y2="110"/>
+        </g>
+        <!-- right face -->
+        <path class="a" d="M128 42 L128 84 L68 112 L68 70 Z" opacity="0.85"/>
+        <g class="s" fill="none" stroke-width="1.4" stroke-linecap="round">
+          <line x1="120" y1="54" x2="78" y2="78"/>
+          <line x1="120" y1="66" x2="78" y2="90"/>
+          <line x1="120" y1="78" x2="78" y2="102"/>
+        </g>
+      </symbol>`,
 
-    // Leaderboard table
-    leaderboard: `<svg viewBox="0 0 100 100">
-      <!-- isometric table -->
-      <path class="f" d="M12 34 L54 22 L88 32 L46 44 Z"/>
-      <path class="s" d="M12 34 L54 22 L88 32 L46 44 Z"/>
-      <!-- side -->
-      <path class="f" d="M12 34 L12 72 L46 82 L46 44 Z"/>
-      <path class="s" d="M12 34 L12 72 L46 82 L46 44 Z"/>
-      <path class="f" d="M46 44 L46 82 L88 70 L88 32 Z"/>
-      <path class="s" d="M46 44 L46 82 L88 70 L88 32 Z"/>
-      <text x="28" y="41" text-anchor="middle" font-size="5.5" font-weight="700" fill="#001a47">Scoreboards</text>
-      <!-- rows -->
-      <path class="s" d="M16 52 L44 60 M16 60 L44 68 M16 68 L44 76" stroke-width="1"/>
-      <path class="s" d="M50 54 L84 44 M50 62 L84 52 M50 70 L84 60" stroke-width="1"/>
-    </svg>`,
+    /* ========================== MODELS ========================== */
 
-    /* === MODELS === */
+    // Fully-connected neural net
+    neuralNet: `
+      <symbol id="sym-neuralNet" viewBox="0 0 120 110">
+        <g class="s" fill="none" stroke-width="1">
+          <!-- edges -->
+          <line x1="20" y1="18" x2="50" y2="34"/>
+          <line x1="20" y1="18" x2="50" y2="56"/>
+          <line x1="20" y1="18" x2="50" y2="78"/>
+          <line x1="20" y1="46" x2="50" y2="34"/>
+          <line x1="20" y1="46" x2="50" y2="56"/>
+          <line x1="20" y1="46" x2="50" y2="78"/>
+          <line x1="20" y1="74" x2="50" y2="34"/>
+          <line x1="20" y1="74" x2="50" y2="56"/>
+          <line x1="20" y1="74" x2="50" y2="78"/>
+          <line x1="50" y1="34" x2="90" y2="22"/>
+          <line x1="50" y1="34" x2="90" y2="48"/>
+          <line x1="50" y1="34" x2="90" y2="76"/>
+          <line x1="50" y1="56" x2="90" y2="22"/>
+          <line x1="50" y1="56" x2="90" y2="48"/>
+          <line x1="50" y1="56" x2="90" y2="76"/>
+          <line x1="50" y1="78" x2="90" y2="22"/>
+          <line x1="50" y1="78" x2="90" y2="48"/>
+          <line x1="50" y1="78" x2="90" y2="76"/>
+        </g>
+        <!-- nodes (front pass, so edges hide behind) -->
+        <circle class="f" cx="20" cy="18" r="7"/>
+        <circle class="f" cx="20" cy="46" r="7"/>
+        <circle class="f" cx="20" cy="74" r="7"/>
+        <circle class="a" cx="50" cy="34" r="7"/>
+        <circle class="a" cx="50" cy="56" r="7"/>
+        <circle class="a" cx="50" cy="78" r="7"/>
+        <circle class="f" cx="90" cy="22" r="7"/>
+        <circle class="f" cx="90" cy="48" r="7"/>
+        <circle class="f" cx="90" cy="76" r="7"/>
+      </symbol>`,
 
-    // Fully-connected NN blob
-    neuralNet: `<svg viewBox="0 0 100 100">
-      <circle class="f" cx="28" cy="22" r="5"/><circle class="s" cx="28" cy="22" r="5" fill="none"/>
-      <circle class="f" cx="18" cy="42" r="5"/><circle class="s" cx="18" cy="42" r="5" fill="none"/>
-      <circle class="f" cx="34" cy="56" r="5"/><circle class="s" cx="34" cy="56" r="5" fill="none"/>
-      <circle class="a" cx="52" cy="36" r="5"/><circle class="s" cx="52" cy="36" r="5" fill="none"/>
-      <circle class="f" cx="62" cy="56" r="5"/><circle class="s" cx="62" cy="56" r="5" fill="none"/>
-      <circle class="f" cx="76" cy="32" r="5"/><circle class="s" cx="76" cy="32" r="5" fill="none"/>
-      <circle class="a" cx="80" cy="56" r="5"/><circle class="s" cx="80" cy="56" r="5" fill="none"/>
-      <circle class="f" cx="44" cy="72" r="5"/><circle class="s" cx="44" cy="72" r="5" fill="none"/>
-      <path class="s" d="M28 22 L52 36 M18 42 L52 36 M34 56 L52 36 M52 36 L62 56 M52 36 L76 32 M52 36 L80 56 M34 56 L62 56 M62 56 L44 72 M80 56 L76 32" fill="none" stroke-width="0.9"/>
-    </svg>`,
+    // CNN / RNN labeled network
+    cnnRnnNet: `
+      <symbol id="sym-cnnRnnNet" viewBox="0 0 140 120">
+        <text x="40" y="12" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)">CNN</text>
+        <text x="100" y="12" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)">RNN</text>
+        <g class="s" fill="none" stroke-width="1">
+          <!-- edges between 3 layers x 3 nodes -->
+          <line x1="24" y1="30" x2="70" y2="46"/>
+          <line x1="24" y1="30" x2="70" y2="72"/>
+          <line x1="24" y1="60" x2="70" y2="46"/>
+          <line x1="24" y1="60" x2="70" y2="72"/>
+          <line x1="24" y1="90" x2="70" y2="46"/>
+          <line x1="24" y1="90" x2="70" y2="72"/>
+          <line x1="70" y1="46" x2="116" y2="30"/>
+          <line x1="70" y1="46" x2="116" y2="60"/>
+          <line x1="70" y1="46" x2="116" y2="90"/>
+          <line x1="70" y1="72" x2="116" y2="30"/>
+          <line x1="70" y1="72" x2="116" y2="60"/>
+          <line x1="70" y1="72" x2="116" y2="90"/>
+        </g>
+        <circle class="f" cx="24" cy="30" r="6"/>
+        <circle class="f" cx="24" cy="60" r="6"/>
+        <circle class="f" cx="24" cy="90" r="6"/>
+        <circle class="a" cx="70" cy="46" r="6"/>
+        <circle class="a" cx="70" cy="72" r="6"/>
+        <circle class="f" cx="116" cy="30" r="6"/>
+        <circle class="f" cx="116" cy="60" r="6"/>
+        <circle class="f" cx="116" cy="90" r="6"/>
+      </symbol>`,
 
-    // Labelled CNN / RNN network
-    cnnRnnNet: `<svg viewBox="0 0 100 100">
-      <text x="32" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="#001a47">CNN</text>
-      <text x="68" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="#001a47">RNN</text>
-      <circle class="f" cx="24" cy="32" r="4"/><circle class="s" cx="24" cy="32" r="4" fill="none"/>
-      <circle class="f" cx="24" cy="52" r="4"/><circle class="s" cx="24" cy="52" r="4" fill="none"/>
-      <circle class="f" cx="24" cy="72" r="4"/><circle class="s" cx="24" cy="72" r="4" fill="none"/>
-      <circle class="a" cx="50" cy="42" r="4"/><circle class="s" cx="50" cy="42" r="4" fill="none"/>
-      <circle class="a" cx="50" cy="62" r="4"/><circle class="s" cx="50" cy="62" r="4" fill="none"/>
-      <circle class="f" cx="76" cy="32" r="4"/><circle class="s" cx="76" cy="32" r="4" fill="none"/>
-      <circle class="f" cx="76" cy="52" r="4"/><circle class="s" cx="76" cy="52" r="4" fill="none"/>
-      <circle class="f" cx="76" cy="72" r="4"/><circle class="s" cx="76" cy="72" r="4" fill="none"/>
-      <path class="s" fill="none" stroke-width="0.8"
-        d="M24 32 L50 42 M24 32 L50 62 M24 52 L50 42 M24 52 L50 62 M24 72 L50 42 M24 72 L50 62
-           M50 42 L76 32 M50 42 L76 52 M50 42 L76 72 M50 62 L76 32 M50 62 L76 52 M50 62 L76 72"/>
-    </svg>`,
+    // Transformer/RNN block stack
+    transformerStack: `
+      <symbol id="sym-transformerStack" viewBox="0 0 130 130">
+        <rect class="a" x="15" y="14" width="100" height="18" rx="2"/>
+        <rect class="s" x="15" y="14" width="100" height="18" rx="2" fill="none"/>
+        <text x="65" y="27" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)">Transformers</text>
+        <path class="s" d="M65 35 l0 5 M62 40 l3 3 l3 -3" fill="none" stroke-width="1.5"/>
 
-    // Transformers/RNN block stack
-    transformerStack: `<svg viewBox="0 0 100 100">
-      <path class="a" d="M20 22 L80 22 L80 34 L20 34 Z"/>
-      <path class="s" d="M20 22 L80 22 L80 34 L20 34 Z"/>
-      <text x="50" y="31" text-anchor="middle" font-size="6.5" font-weight="700" fill="#001a47">Transformers</text>
-      <path class="s" d="M50 38 L50 42 M47 42 l3 -3 l3 3" fill="none" stroke-width="1.1"/>
-      <path class="f" d="M20 44 L80 44 L80 56 L20 56 Z"/>
-      <path class="s" d="M20 44 L80 44 L80 56 L20 56 Z"/>
-      <text x="50" y="53" text-anchor="middle" font-size="6.5" font-weight="700" fill="#001a47">RNN</text>
-      <path class="a" d="M20 60 L80 60 L80 72 L20 72 Z"/>
-      <path class="s" d="M20 60 L80 60 L80 72 L20 72 Z"/>
-      <text x="50" y="69" text-anchor="middle" font-size="6.5" font-weight="700" fill="#001a47">Transformers</text>
-      <path class="f" d="M20 76 L80 76 L80 86 L20 86 Z"/>
-      <path class="s" d="M20 76 L80 76 L80 86 L20 86 Z"/>
-      <text x="50" y="83" text-anchor="middle" font-size="6.5" font-weight="700" fill="#001a47">Corpuses</text>
-    </svg>`,
+        <rect class="f" x="15" y="44" width="100" height="18" rx="2"/>
+        <text x="65" y="57" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)">RNN</text>
+        <path class="s" d="M65 65 l0 5 M62 70 l3 3 l3 -3" fill="none" stroke-width="1.5"/>
 
-    // Training flow diagram
-    trainingFlow: `<svg viewBox="0 0 100 100">
-      <text x="22" y="32" text-anchor="middle" font-size="6" fill="#001a47">Training</text>
-      <path class="a" d="M44 38 L62 38 L62 50 L44 50 Z"/>
-      <path class="s" d="M44 38 L62 38 L62 50 L44 50 Z"/>
-      <path class="f" d="M53 58 L68 68 L53 78 L38 68 Z"/>
-      <path class="s" d="M53 58 L68 68 L53 78 L38 68 Z"/>
-      <path class="a" d="M22 66 L34 66 L34 74 L22 74 Z"/>
-      <path class="s" d="M22 66 L34 66 L34 74 L22 74 Z"/>
-      <path class="a" d="M74 66 L86 66 L86 74 L74 74 Z"/>
-      <path class="s" d="M74 66 L86 66 L86 74 L74 74 Z"/>
-      <path class="a" d="M44 84 L62 84 L62 92 L44 92 Z"/>
-      <path class="s" d="M44 84 L62 84 L62 92 L44 92 Z"/>
-      <path class="s" d="M53 50 L53 58 M38 68 L34 70 M68 68 L74 70 M53 78 L53 84
-                         M28 66 Q 28 54 44 50 M80 66 Q 80 54 62 50" fill="none" stroke-dasharray="2 2" stroke-width="0.9"/>
-    </svg>`,
+        <rect class="a" x="15" y="74" width="100" height="18" rx="2"/>
+        <rect class="s" x="15" y="74" width="100" height="18" rx="2" fill="none"/>
+        <text x="65" y="87" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)">Transformers</text>
+        <path class="s" d="M65 95 l0 5 M62 100 l3 3 l3 -3" fill="none" stroke-width="1.5"/>
 
-    // Algorithm flowchart with diamond
-    algorithm: `<svg viewBox="0 0 100 100">
-      <path class="a" d="M38 14 L70 14 L70 24 L38 24 Z"/>
-      <path class="s" d="M38 14 L70 14 L70 24 L38 24 Z"/>
-      <text x="54" y="21" text-anchor="middle" font-size="6" font-weight="700" fill="#001a47">Algorithm</text>
-      <path class="s" d="M54 26 L54 34" stroke-width="1" fill="none"/>
-      <path class="f" d="M54 36 L76 54 L54 72 L32 54 Z"/>
-      <path class="s" d="M54 36 L76 54 L54 72 L32 54 Z"/>
-      <path class="s" d="M54 72 L54 80" stroke-width="1" fill="none"/>
-      <path class="a" d="M38 80 L70 80 L70 92 L38 92 Z"/>
-      <path class="s" d="M38 80 L70 80 L70 92 L38 92 Z"/>
-      <path class="s" d="M70 54 Q 82 72 54 80" fill="none" stroke-dasharray="2 2"/>
-    </svg>`,
+        <rect class="f" x="15" y="104" width="100" height="18" rx="2"/>
+        <text x="65" y="117" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" font-weight="700" fill="var(--ink)">Corpuses</text>
+      </symbol>`,
 
-    /* === DATASETS === */
+    // Training flow
+    trainingFlow: `
+      <symbol id="sym-trainingFlow" viewBox="0 0 160 110">
+        <text x="22" y="34" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="11" fill="var(--ink)">Training</text>
+        <rect class="a" x="64" y="18" width="40" height="18" rx="3"/>
+        <rect class="s" x="64" y="18" width="40" height="18" rx="3" fill="none"/>
+        <!-- arrow down -->
+        <path class="s" d="M84 40 l0 8" fill="none" stroke-width="1.4"/>
+        <polygon class="s" points="82,46 84,50 86,46" fill="var(--ink)"/>
+        <!-- diamond -->
+        <path class="f" d="M84 56 L112 74 L84 92 L56 74 Z"/>
+        <!-- side options -->
+        <rect class="a" x="18" y="70" width="30" height="14" rx="3"/>
+        <rect class="s" x="18" y="70" width="30" height="14" rx="3" fill="none"/>
+        <rect class="a" x="120" y="70" width="30" height="14" rx="3"/>
+        <rect class="s" x="120" y="70" width="30" height="14" rx="3" fill="none"/>
+        <rect class="a" x="64" y="96" width="40" height="14" rx="3"/>
+        <rect class="s" x="64" y="96" width="40" height="14" rx="3" fill="none"/>
+        <!-- dashed connector back -->
+        <g class="s" fill="none" stroke-width="1" stroke-dasharray="3 2">
+          <path d="M22 38 Q 22 62 32 70"/>
+          <path d="M148 84 Q 148 62 120 52"/>
+        </g>
+      </symbol>`,
 
-    // Stacked cylindrical DBs (pair)
-    databasePair: `<svg viewBox="0 0 100 100">
-      <!-- left db -->
-      <ellipse class="f" cx="30" cy="22" rx="14" ry="5"/>
-      <path class="s" d="M16 22 v40 a14 5 0 0 0 28 0 v-40" fill="none"/>
-      <ellipse class="s" cx="30" cy="22" rx="14" ry="5" fill="none"/>
-      <path class="s" d="M16 34 a14 5 0 0 0 28 0 M16 46 a14 5 0 0 0 28 0" fill="none"/>
-      <ellipse class="a" cx="30" cy="22" rx="14" ry="5" opacity="0.55"/>
-      <!-- right db -->
-      <ellipse class="f" cx="66" cy="30" rx="14" ry="5"/>
-      <path class="s" d="M52 30 v40 a14 5 0 0 0 28 0 v-40" fill="none"/>
-      <ellipse class="s" cx="66" cy="30" rx="14" ry="5" fill="none"/>
-      <path class="s" d="M52 42 a14 5 0 0 0 28 0 M52 54 a14 5 0 0 0 28 0" fill="none"/>
-      <ellipse class="a" cx="66" cy="30" rx="14" ry="5" opacity="0.55"/>
-    </svg>`,
+    // Algorithm flow (diamond)
+    algorithmFlow: `
+      <symbol id="sym-algorithmFlow" viewBox="0 0 120 120">
+        <rect class="a" x="34" y="10" width="54" height="16" rx="3"/>
+        <rect class="s" x="34" y="10" width="54" height="16" rx="3" fill="none"/>
+        <text x="61" y="21" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="10" font-weight="600" fill="var(--ink)">Algorithm</text>
+        <line class="s" x1="61" y1="28" x2="61" y2="42" stroke-width="1.3"/>
+        <polygon class="s" points="58,40 61,46 64,40" fill="var(--ink)"/>
+        <!-- diamond -->
+        <path class="f" d="M61 48 L96 74 L61 100 L26 74 Z"/>
+        <!-- loop-back arrow on right -->
+        <path class="s" d="M96 74 Q 112 72 108 92 Q 96 100 82 94" fill="none" stroke-width="1.2" stroke-dasharray="3 2"/>
+        <polygon class="s" points="82,96 78,93 84,91" fill="var(--ink)"/>
+      </symbol>`,
 
-    // Data lake (wide cylinder)
-    dataLake: `<svg viewBox="0 0 100 100">
-      <ellipse class="f" cx="50" cy="28" rx="28" ry="8"/>
-      <path class="s" d="M22 28 v26 a28 8 0 0 0 56 0 v-26" fill="none"/>
-      <ellipse class="s" cx="50" cy="28" rx="28" ry="8" fill="none"/>
-      <!-- liquid line -->
-      <path class="a" d="M22 44 q 14 6 28 0 t 28 0 v10 a28 8 0 0 1 -56 0 Z" opacity="0.85"/>
-      <path class="s" d="M22 44 q 14 6 28 0 t 28 0" fill="none"/>
-    </svg>`,
+    /* ========================== DATASETS ========================== */
 
-    // Image tiles
-    imageTiles: `<svg viewBox="0 0 100 100">
-      <!-- back tile -->
-      <path class="f" d="M18 20 L64 20 L64 54 L18 54 Z"/>
-      <path class="s" d="M18 20 L64 20 L64 54 L18 54 Z"/>
-      <circle class="a" cx="28" cy="30" r="3"/>
-      <path class="a" d="M22 50 L34 38 L44 48 L52 42 L60 50 L60 52 L22 52 Z"/>
-      <path class="s" d="M22 50 L34 38 L44 48 L52 42 L60 50" fill="none"/>
-      <text x="22" y="60" font-size="5" fill="#001a47">image</text>
-      <!-- front tile -->
-      <path class="f" d="M36 40 L82 40 L82 74 L36 74 Z"/>
-      <path class="s" d="M36 40 L82 40 L82 74 L36 74 Z"/>
-      <circle class="a" cx="46" cy="50" r="3"/>
-      <path class="a" d="M40 70 L52 58 L62 68 L70 62 L78 70 L78 72 L40 72 Z"/>
-      <path class="s" d="M40 70 L52 58 L62 68 L70 62 L78 70" fill="none"/>
-      <text x="40" y="80" font-size="5" fill="#001a47">image</text>
-    </svg>`,
+    // Stacked database cylinders
+    dbStack: `
+      <symbol id="sym-dbStack" viewBox="0 0 160 110">
+        <!-- left cylinder -->
+        <g>
+          <ellipse class="f" cx="44" cy="18" rx="30" ry="8"/>
+          <path class="f" d="M14 18 L14 66 A 30 8 0 0 0 74 66 L74 18"/>
+          <g class="s" fill="none">
+            <path d="M14 18 L14 66 A 30 8 0 0 0 74 66 L74 18"/>
+            <ellipse cx="44" cy="18" rx="30" ry="8"/>
+            <path d="M14 34 A 30 8 0 0 0 74 34" stroke-dasharray="3 2" opacity="0.7"/>
+            <path d="M14 50 A 30 8 0 0 0 74 50"/>
+          </g>
+          <circle class="a" cx="58" cy="26" r="1.6"/>
+          <circle class="a" cx="58" cy="42" r="1.6"/>
+          <circle class="a" cx="58" cy="58" r="1.6"/>
+        </g>
+        <!-- right cylinder -->
+        <g>
+          <ellipse class="a" cx="114" cy="30" rx="30" ry="8"/>
+          <path class="a" d="M84 30 L84 76 A 30 8 0 0 0 144 76 L144 30"/>
+          <g class="s" fill="none">
+            <path d="M84 30 L84 76 A 30 8 0 0 0 144 76 L144 30"/>
+            <ellipse cx="114" cy="30" rx="30" ry="8"/>
+            <path d="M84 46 A 30 8 0 0 0 144 46" stroke-dasharray="3 2" opacity="0.7"/>
+            <path d="M84 62 A 30 8 0 0 0 144 62"/>
+          </g>
+          <circle class="f" cx="128" cy="38" r="1.8"/>
+          <circle class="f" cx="128" cy="54" r="1.8"/>
+          <circle class="f" cx="128" cy="70" r="1.8"/>
+        </g>
+      </symbol>`,
 
-    // Text docs (two windows)
-    textDocs: `<svg viewBox="0 0 100 100">
-      <!-- back doc -->
-      <path class="f" d="M14 18 L64 18 L64 60 L14 60 Z"/>
-      <path class="s" d="M14 18 L64 18 L64 60 L14 60 Z M14 26 L64 26"/>
-      <circle class="a" cx="19" cy="22" r="1.2"/><circle class="a" cx="24" cy="22" r="1.2"/>
-      <text x="39" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#001a47">T</text>
-      <path class="s" d="M20 46 h38 M20 52 h30" stroke-width="1.1"/>
-      <!-- front doc -->
-      <path class="f" d="M36 30 L86 30 L86 74 L36 74 Z"/>
-      <path class="s" d="M36 30 L86 30 L86 74 L36 74 Z M36 38 L86 38"/>
-      <circle class="a" cx="41" cy="34" r="1.2"/><circle class="a" cx="46" cy="34" r="1.2"/>
-      <path class="s" d="M42 46 h38 M42 52 h30 M42 58 h36 M42 64 h28 M42 70 h34"/>
-    </svg>`,
+    // Data lake (wide cylinder with liquid line)
+    dataLake: `
+      <symbol id="sym-dataLake" viewBox="0 0 160 110">
+        <ellipse class="f" cx="80" cy="22" rx="60" ry="14"/>
+        <path class="f" d="M20 22 L20 74 A 60 14 0 0 0 140 74 L140 22"/>
+        <g class="s" fill="none">
+          <path d="M20 22 L20 74 A 60 14 0 0 0 140 74 L140 22"/>
+          <ellipse cx="80" cy="22" rx="60" ry="14"/>
+        </g>
+        <!-- liquid surface -->
+        <path class="a" d="M22 44 Q 52 52 80 44 T 138 44 L138 74 A 58 12 0 0 1 22 74 Z" opacity="0.85"/>
+        <path class="s" fill="none" d="M22 44 Q 52 52 80 44 T 138 44"/>
+      </symbol>`,
 
-    // Spreadsheet / table
-    spreadsheet: `<svg viewBox="0 0 100 100">
-      <!-- back sheet -->
-      <path class="f" d="M14 22 L56 22 L56 58 L14 58 Z"/>
-      <path class="s" d="M14 22 L56 22 L56 58 L14 58 Z"/>
-      <path class="s" d="M14 30 L56 30 M14 38 L56 38 M14 46 L56 46 M14 54 L56 54 M24 22 L24 58 M36 22 L36 58 M46 22 L46 58"/>
-      <!-- front sheet -->
-      <path class="f" d="M34 38 L86 38 L86 78 L34 78 Z"/>
-      <path class="s" d="M34 38 L86 38 L86 78 L34 78 Z"/>
-      <path class="s" d="M34 46 L86 46 M34 54 L86 54 M34 62 L86 62 M34 70 L86 70 M46 38 L46 78 M58 38 L58 78 M70 38 L70 78"/>
-      <rect class="a" x="46" y="46" width="12" height="8"/>
-      <rect class="a" x="58" y="54" width="12" height="8"/>
-    </svg>`,
+    // Image tiles (two stacked picture frames)
+    imageTiles: `
+      <symbol id="sym-imageTiles" viewBox="0 0 130 110">
+        <!-- back -->
+        <rect class="f" x="10" y="14" width="68" height="52" rx="3"/>
+        <circle class="a" cx="24" cy="28" r="4"/>
+        <path class="a" d="M14 62 L30 46 L44 58 L56 50 L74 62 L74 64 L14 64 Z"/>
+        <path class="s" fill="none" d="M14 62 L30 46 L44 58 L56 50 L74 62"/>
+        <text x="14" y="74" font-family="'Urbanist', sans-serif" font-size="9" fill="var(--ink)">image</text>
+        <!-- front -->
+        <rect class="f" x="42" y="40" width="76" height="60" rx="3"/>
+        <circle class="a" cx="56" cy="54" r="5"/>
+        <path class="a" d="M46 94 L64 74 L80 86 L94 76 L114 96 L114 98 L46 98 Z"/>
+        <path class="s" fill="none" d="M46 94 L64 74 L80 86 L94 76 L114 96"/>
+        <text x="46" y="108" font-family="'Urbanist', sans-serif" font-size="9" fill="var(--ink)">image</text>
+      </symbol>`,
 
-    /* === INFRASTRUCTURE === */
+    // Text docs (two windows, with big "T" glyph on back one)
+    textDocs: `
+      <symbol id="sym-textDocs" viewBox="0 0 130 110">
+        <!-- back doc -->
+        <rect class="f" x="8" y="10" width="70" height="64" rx="3"/>
+        <line class="s" x1="8" y1="22" x2="78" y2="22"/>
+        <circle class="a" cx="15" cy="16" r="1.4"/>
+        <circle class="a" cx="21" cy="16" r="1.4"/>
+        <text x="43" y="48" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="22" font-weight="800" fill="var(--ink)">T</text>
+        <line class="s" x1="14" y1="56" x2="70" y2="56"/>
+        <line class="s" x1="14" y1="64" x2="60" y2="64"/>
+        <!-- front doc -->
+        <rect class="f" x="44" y="34" width="76" height="70" rx="3"/>
+        <line class="s" x1="44" y1="46" x2="120" y2="46"/>
+        <circle class="a" cx="52" cy="40" r="1.4"/>
+        <circle class="a" cx="58" cy="40" r="1.4"/>
+        <line class="s" x1="50" y1="58" x2="114" y2="58"/>
+        <line class="s" x1="50" y1="66" x2="108" y2="66"/>
+        <line class="s" x1="50" y1="74" x2="114" y2="74"/>
+        <line class="s" x1="50" y1="82" x2="98" y2="82"/>
+        <line class="s" x1="50" y1="90" x2="110" y2="90"/>
+      </symbol>`,
 
-    // Server rack cluster (three racks in iso)
-    serverRacks: `<svg viewBox="0 0 100 100">
-      <!-- left rack -->
-      <path class="f" d="M12 26 L28 22 L28 82 L12 86 Z"/>
-      <path class="s" d="M12 26 L28 22 L28 82 L12 86 Z"/>
-      <path class="f" d="M28 22 L40 26 L40 86 L28 82 Z"/>
-      <path class="s" d="M28 22 L40 26 L40 86 L28 82 Z"/>
-      <path class="s" d="M14 38 L28 34 M14 48 L28 44 M14 58 L28 54 M14 68 L28 64 M14 78 L28 74" stroke-width="0.8"/>
-      <path class="s" d="M28 34 L40 38 M28 44 L40 48 M28 54 L40 58 M28 64 L40 68 M28 74 L40 78" stroke-width="0.8"/>
-      <rect class="a" x="30" y="28" width="8" height="3"/>
-      <rect class="a" x="30" y="40" width="8" height="3"/>
-      <!-- middle rack -->
-      <path class="f" d="M42 22 L58 18 L58 78 L42 82 Z"/>
-      <path class="s" d="M42 22 L58 18 L58 78 L42 82 Z"/>
-      <path class="f" d="M58 18 L70 22 L70 82 L58 78 Z"/>
-      <path class="s" d="M58 18 L70 22 L70 82 L58 78 Z"/>
-      <path class="s" d="M44 34 L58 30 M44 44 L58 40 M44 54 L58 50 M44 64 L58 60 M44 74 L58 70" stroke-width="0.8"/>
-      <path class="s" d="M58 30 L70 34 M58 40 L70 44 M58 50 L70 54 M58 60 L70 64 M58 70 L70 74" stroke-width="0.8"/>
-      <rect class="a" x="60" y="24" width="8" height="3"/>
-      <rect class="a" x="60" y="36" width="8" height="3"/>
-      <!-- right rack -->
-      <path class="f" d="M72 26 L86 22 L86 78 L72 82 Z"/>
-      <path class="s" d="M72 26 L86 22 L86 78 L72 82 Z"/>
-      <path class="s" d="M74 38 L86 34 M74 48 L86 44 M74 58 L86 54 M74 68 L86 64" stroke-width="0.8"/>
-    </svg>`,
+    // Spreadsheet (two tables)
+    spreadsheet: `
+      <symbol id="sym-spreadsheet" viewBox="0 0 140 110">
+        <!-- back -->
+        <rect class="f" x="6" y="12" width="60" height="50" rx="2"/>
+        <g class="s" fill="none" stroke-width="1">
+          <line x1="6" y1="22" x2="66" y2="22"/>
+          <line x1="6" y1="32" x2="66" y2="32"/>
+          <line x1="6" y1="42" x2="66" y2="42"/>
+          <line x1="6" y1="52" x2="66" y2="52"/>
+          <line x1="21" y1="12" x2="21" y2="62"/>
+          <line x1="36" y1="12" x2="36" y2="62"/>
+          <line x1="51" y1="12" x2="51" y2="62"/>
+        </g>
+        <!-- front -->
+        <rect class="f" x="36" y="36" width="98" height="64" rx="2"/>
+        <g class="s" fill="none" stroke-width="1">
+          <line x1="36" y1="48" x2="134" y2="48"/>
+          <line x1="36" y1="60" x2="134" y2="60"/>
+          <line x1="36" y1="72" x2="134" y2="72"/>
+          <line x1="36" y1="84" x2="134" y2="84"/>
+          <line x1="36" y1="96" x2="134" y2="96"/>
+          <line x1="56" y1="36" x2="56" y2="100"/>
+          <line x1="76" y1="36" x2="76" y2="100"/>
+          <line x1="96" y1="36" x2="96" y2="100"/>
+          <line x1="116" y1="36" x2="116" y2="100"/>
+        </g>
+        <rect class="a" x="56" y="48" width="20" height="12"/>
+        <rect class="a" x="76" y="60" width="20" height="12"/>
+        <rect class="a" x="96" y="72" width="20" height="12"/>
+      </symbol>`,
 
-    // Smaller server node pair
-    serverNodes: `<svg viewBox="0 0 100 100">
-      <path class="f" d="M18 32 L40 26 L40 78 L18 84 Z"/>
-      <path class="s" d="M18 32 L40 26 L40 78 L18 84 Z"/>
-      <path class="f" d="M40 26 L58 32 L58 84 L40 78 Z"/>
-      <path class="s" d="M40 26 L58 32 L58 84 L40 78 Z"/>
-      <path class="s" d="M22 44 L40 40 M22 56 L40 52 M22 68 L40 64" stroke-width="0.8"/>
-      <rect class="a" x="42" y="36" width="14" height="3"/>
-      <rect class="a" x="42" y="48" width="14" height="3"/>
-      <rect class="a" x="42" y="60" width="14" height="3"/>
-      <!-- second node behind -->
-      <path class="f" d="M56 28 L74 24 L74 72 L56 76 Z" opacity="0.85"/>
-      <path class="s" d="M56 28 L74 24 L74 72 L56 76 Z"/>
-      <path class="f" d="M74 24 L86 28 L86 76 L74 72 Z"/>
-      <path class="s" d="M74 24 L86 28 L86 76 L74 72 Z"/>
-      <rect class="a" x="76" y="32" width="8" height="3"/>
-      <rect class="a" x="76" y="42" width="8" height="3"/>
-    </svg>`,
+    /* ========================== INFRASTRUCTURE ========================== */
 
-    // TPU card with ports
-    tpuCard: `<svg viewBox="0 0 100 100">
-      <!-- board -->
-      <path class="f" d="M8 42 L70 30 L90 38 L28 50 Z"/>
-      <path class="s" d="M8 42 L70 30 L90 38 L28 50 Z"/>
-      <path class="f" d="M8 42 L8 54 L28 62 L28 50 Z"/>
-      <path class="s" d="M8 42 L8 54 L28 62 L28 50 Z"/>
-      <path class="f" d="M28 50 L28 62 L90 50 L90 38 Z"/>
-      <path class="s" d="M28 50 L28 62 L90 50 L90 38 Z"/>
-      <!-- chip grid on top -->
-      <path class="a" d="M20 44 L60 36 L68 40 L28 48 Z"/>
-      <path class="s" d="M20 44 L60 36 L68 40 L28 48 Z"/>
-      <path class="s" stroke-width="0.6" d="M24 44 L64 36 M26 45 L66 37 M28 46 L68 38 M30 47 L70 39"/>
-      <!-- label -->
-      <text x="72" y="58" text-anchor="middle" font-size="7" font-weight="700" fill="#001a47" font-style="italic">TPUs</text>
-    </svg>`,
+    // Server-rack cluster (iso)
+    serverRacks: `
+      <symbol id="sym-serverRacks" viewBox="0 0 180 150">
+        <!-- three racks side by side, slightly staggered -->
+        <g>
+          <!-- rack 1 (back-left) -->
+          <path class="f" d="M12 44 L44 30 L44 108 L12 122 Z"/>
+          <path class="a" d="M44 30 L64 40 L64 118 L44 108 Z"/>
+          <path class="f" d="M12 44 L44 30 L64 40 L32 54 Z"/>
+          <g class="s" fill="none" stroke-width="0.9">
+            <line x1="18" y1="60" x2="38" y2="52"/>
+            <line x1="18" y1="72" x2="38" y2="64"/>
+            <line x1="18" y1="84" x2="38" y2="76"/>
+            <line x1="18" y1="96" x2="38" y2="88"/>
+            <line x1="18" y1="108" x2="38" y2="100"/>
+            <line x1="46" y1="56" x2="62" y2="64"/>
+            <line x1="46" y1="68" x2="62" y2="76"/>
+            <line x1="46" y1="80" x2="62" y2="88"/>
+            <line x1="46" y1="92" x2="62" y2="100"/>
+          </g>
+        </g>
+        <g>
+          <!-- rack 2 (center) -->
+          <path class="f" d="M60 38 L94 24 L94 104 L60 118 Z"/>
+          <path class="a" d="M94 24 L116 34 L116 114 L94 104 Z"/>
+          <path class="f" d="M60 38 L94 24 L116 34 L82 48 Z"/>
+          <g class="s" fill="none" stroke-width="0.9">
+            <line x1="66" y1="54" x2="88" y2="46"/>
+            <line x1="66" y1="66" x2="88" y2="58"/>
+            <line x1="66" y1="78" x2="88" y2="70"/>
+            <line x1="66" y1="90" x2="88" y2="82"/>
+            <line x1="66" y1="102" x2="88" y2="94"/>
+            <line x1="96" y1="50" x2="114" y2="58"/>
+            <line x1="96" y1="62" x2="114" y2="70"/>
+            <line x1="96" y1="74" x2="114" y2="82"/>
+            <line x1="96" y1="86" x2="114" y2="94"/>
+          </g>
+        </g>
+        <g>
+          <!-- rack 3 (back-right) -->
+          <path class="f" d="M112 44 L142 32 L142 106 L112 120 Z"/>
+          <path class="a" d="M142 32 L160 40 L160 114 L142 106 Z"/>
+          <path class="f" d="M112 44 L142 32 L160 40 L130 54 Z"/>
+          <g class="s" fill="none" stroke-width="0.9">
+            <line x1="118" y1="60" x2="138" y2="52"/>
+            <line x1="118" y1="72" x2="138" y2="64"/>
+            <line x1="118" y1="84" x2="138" y2="76"/>
+            <line x1="118" y1="96" x2="138" y2="88"/>
+            <line x1="144" y1="56" x2="158" y2="62"/>
+            <line x1="144" y1="68" x2="158" y2="74"/>
+            <line x1="144" y1="80" x2="158" y2="86"/>
+          </g>
+        </g>
+      </symbol>`,
 
-    // Network cable loop
-    cable: `<svg viewBox="0 0 100 100">
-      <!-- connector left -->
-      <path class="a" d="M10 70 L22 62 L30 66 L18 74 Z"/>
-      <path class="s" d="M10 70 L22 62 L30 66 L18 74 Z"/>
-      <!-- cable curve -->
-      <path class="s" d="M20 68 Q 40 20 60 30 Q 80 40 84 58" fill="none" stroke-width="2"/>
-      <!-- connector right -->
-      <path class="a" d="M78 56 L90 48 L98 52 L86 60 Z"/>
-      <path class="s" d="M78 56 L90 48 L98 52 L86 60 Z"/>
-    </svg>`,
+    // Smaller server-node pair
+    serverNodes: `
+      <symbol id="sym-serverNodes" viewBox="0 0 160 120">
+        <g>
+          <path class="f" d="M16 38 L58 24 L58 92 L16 106 Z"/>
+          <path class="a" d="M58 24 L86 36 L86 104 L58 92 Z"/>
+          <path class="f" d="M16 38 L58 24 L86 36 L44 50 Z"/>
+          <rect class="a" x="62" y="40" width="18" height="3"/>
+          <rect class="a" x="62" y="50" width="18" height="3"/>
+          <rect class="a" x="62" y="60" width="18" height="3"/>
+          <rect class="a" x="62" y="70" width="18" height="3"/>
+          <rect class="a" x="62" y="80" width="18" height="3"/>
+          <rect class="a" x="62" y="90" width="18" height="3"/>
+          <g class="s" fill="none" stroke-width="0.9">
+            <line x1="22" y1="52" x2="42" y2="46"/>
+            <line x1="22" y1="62" x2="42" y2="56"/>
+            <line x1="22" y1="72" x2="42" y2="66"/>
+            <line x1="22" y1="82" x2="42" y2="76"/>
+            <line x1="22" y1="92" x2="42" y2="86"/>
+          </g>
+        </g>
+        <g>
+          <path class="f" d="M80 34 L124 20 L124 86 L80 100 Z" opacity="0.88"/>
+          <path class="a" d="M124 20 L152 32 L152 98 L124 86 Z"/>
+          <path class="f" d="M80 34 L124 20 L152 32 L108 46 Z"/>
+          <rect class="a" x="128" y="36" width="18" height="3"/>
+          <rect class="a" x="128" y="46" width="18" height="3"/>
+          <rect class="a" x="128" y="56" width="18" height="3"/>
+          <rect class="a" x="128" y="66" width="18" height="3"/>
+          <rect class="a" x="128" y="76" width="18" height="3"/>
+        </g>
+      </symbol>`,
 
-    // Short cable (second one)
-    cableShort: `<svg viewBox="0 0 100 100">
-      <path class="a" d="M14 60 L26 52 L34 56 L22 64 Z"/>
-      <path class="s" d="M14 60 L26 52 L34 56 L22 64 Z"/>
-      <path class="s" d="M24 58 Q 50 84 72 58" fill="none" stroke-width="2"/>
-      <path class="a" d="M66 56 L78 48 L86 52 L74 60 Z"/>
-      <path class="s" d="M66 56 L78 48 L86 52 L74 60 Z"/>
-    </svg>`,
+    // TPU card (iso PCB with label)
+    tpuCard: `
+      <symbol id="sym-tpuCard" viewBox="0 0 180 100">
+        <!-- top face -->
+        <path class="f" d="M10 52 L130 24 L170 38 L50 66 Z"/>
+        <!-- side face -->
+        <path class="a" d="M10 52 L10 68 L50 82 L50 66 Z"/>
+        <!-- front face -->
+        <path class="a" d="M50 66 L50 82 L170 54 L170 38 Z"/>
+        <!-- chip grid on top -->
+        <path class="a" d="M42 54 L116 36 L132 42 L58 60 Z"/>
+        <path class="s" d="M42 54 L116 36 L132 42 L58 60 Z" fill="none"/>
+        <g class="s" fill="none" stroke-width="0.6">
+          <line x1="48" y1="56" x2="120" y2="38"/>
+          <line x1="50" y1="58" x2="122" y2="40"/>
+          <line x1="52" y1="60" x2="124" y2="42"/>
+          <line x1="54" y1="62" x2="126" y2="44"/>
+          <line x1="56" y1="64" x2="128" y2="46"/>
+        </g>
+        <!-- label -->
+        <text x="136" y="68" text-anchor="middle" font-family="'Urbanist', sans-serif"
+              font-size="13" font-style="italic" font-weight="700" fill="var(--ink)">TPUs</text>
+      </symbol>`,
+
+    // Ethernet cable (iso)
+    cableLoop: `
+      <symbol id="sym-cableLoop" viewBox="0 0 180 120">
+        <!-- plug 1 -->
+        <path class="a" d="M10 70 L32 56 L46 62 L24 76 Z"/>
+        <path class="s" d="M10 70 L32 56 L46 62 L24 76 Z" fill="none"/>
+        <rect class="s" x="38" y="60" width="6" height="4" fill="none"/>
+        <!-- cable loop -->
+        <path class="s" d="M32 64 Q 40 20 90 34 Q 140 48 150 92" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        <!-- plug 2 -->
+        <path class="a" d="M140 90 L162 76 L176 82 L154 96 Z"/>
+        <path class="s" d="M140 90 L162 76 L176 82 L154 96 Z" fill="none"/>
+      </symbol>`,
+
+    // Short cable
+    cableShort: `
+      <symbol id="sym-cableShort" viewBox="0 0 180 110">
+        <path class="a" d="M14 70 L36 56 L50 62 L28 76 Z"/>
+        <path class="s" d="M14 70 L36 56 L50 62 L28 76 Z" fill="none"/>
+        <path class="s" d="M36 64 Q 90 110 146 50" fill="none" stroke-width="2.6" stroke-linecap="round"/>
+        <path class="a" d="M136 48 L158 34 L172 40 L150 54 Z"/>
+        <path class="s" d="M136 48 L158 34 L172 40 L150 54 Z" fill="none"/>
+      </symbol>`,
   };
 
-  /* ---------- Layer definitions ----------
-     Each layer has a set of positioned items. Coordinates
-     are 0–100 (%). Connectors are optional dashed arrows
-     drawn between items on the same plane. */
+  /* ------------------------------------------------------------------
+     LAYER LAYOUT
+     Each layer has a list of items placed at grid coordinates.
+     Each item: { kind, gx, gy, w, h } -- w,h are the footprint in
+     grid units. The symbol is rendered via <foreignObject>-free
+     pure SVG by positioning an outer <svg viewBox ...> inside a <g>.
+
+     Intra-layer arrows connect items by index.
+     ------------------------------------------------------------------ */
 
   const LAYERS = [
     {
       id: 'apps',
       name: 'Apps & Tools',
       count: 6,
-      desc: 'End-user surfaces — IDE plugins, APIs, playgrounds and CLI wrappers built on top of the open stack.',
+      desc: 'End-user surfaces — IDE plugins, APIs, playgrounds and CLI wrappers.',
       items: ['Aina Kit', 'ALIA Kit', 'Playground', 'REST API', 'CLI', 'SDK'],
-      z: 160,
-      glyphs: [
-        { x: 28, y: 30, size: 22, kind: 'appIcon' },
-        { x: 46, y: 22, size: 22, kind: 'browserUI' },
-        { x: 66, y: 26, size: 22, kind: 'browserCode' },
-        { x: 38, y: 50, size: 24, kind: 'gearStack' },
-        { x: 58, y: 46, size: 22, kind: 'apiGlobe' },
-        { x: 76, y: 50, size: 22, kind: 'searchDoc' },
-        { x: 50, y: 68, size: 22, kind: 'laptop' },
+      objects: [
+        // gx, gy are the center of the illustration in grid coords
+        { kind: 'appIcon',     gx: 16, gy: 28, w: 14, h: 14 },
+        { kind: 'browserWin1', gx: 28, gy: 10, w: 18, h: 16 },
+        { kind: 'browserWin2', gx: 36, gy: 18, w: 20, h: 16 },
+        { kind: 'gearStack',   gx: 22, gy: 40, w: 18, h: 16 },
+        { kind: 'apiGlobe',    gx: 34, gy: 32, w: 20, h: 18 },
+        { kind: 'laptop',      gx: 46, gy: 30, w: 22, h: 16 },
+        { kind: 'searchCard',  gx: 50, gy: 18, w: 20, h: 18 },
       ],
-      connectors: [
-        { from: 0, to: 3 },
-        { from: 3, to: 4 },
-        { from: 4, to: 5 },
-        { from: 4, to: 6 },
+      links: [
+        [0, 3], [3, 4], [4, 5], [5, 6], [4, 6]
       ],
     },
     {
       id: 'benchmarks',
       name: 'Benchmarks',
       count: 8,
-      desc: 'Evaluation suites used to compare models across tasks, languages and fairness dimensions.',
+      desc: 'Evaluation suites across tasks, languages and fairness dimensions.',
       items: ['LinguaBench', 'SpeechBench', 'VisionEval', 'TranslatEval'],
-      z: 80,
-      glyphs: [
-        { x: 24, y: 30, size: 22, kind: 'lineChart' },
-        { x: 38, y: 48, size: 22, kind: 'lineChartCurve' },
-        { x: 54, y: 32, size: 22, kind: 'barChart' },
-        { x: 74, y: 30, size: 22, kind: 'clipboard' },
-        { x: 58, y: 60, size: 26, kind: 'scoreboard' },
-        { x: 36, y: 70, size: 22, kind: 'leaderboard' },
+      objects: [
+        { kind: 'lineChart',      gx: 18, gy: 22, w: 18, h: 14 },
+        { kind: 'lineChartCurve', gx: 28, gy: 34, w: 18, h: 14 },
+        { kind: 'barChart',       gx: 36, gy: 24, w: 16, h: 16 },
+        { kind: 'clipboard',      gx: 50, gy: 20, w: 14, h: 18 },
+        { kind: 'scoreboard',     gx: 42, gy: 40, w: 24, h: 20 },
       ],
-      connectors: [
-        { from: 0, to: 2 },
-        { from: 2, to: 4 },
-        { from: 4, to: 3 },
-        { from: 5, to: 4 },
+      links: [
+        [0, 2], [1, 2], [2, 4], [4, 3]
       ],
     },
     {
       id: 'models',
       name: 'Models',
       count: 15,
-      desc: 'Open language, speech, vision and multimodal models — trained, documented and versioned in public.',
+      desc: 'Open language, speech, vision and multimodal models — trained in public.',
       items: ['ALIA 40B', 'ALIA 7B', 'Aina-MT', 'Whisper-cat', 'Vision-OC'],
-      z: 0,
-      glyphs: [
-        { x: 26, y: 34, size: 24, kind: 'neuralNet' },
-        { x: 42, y: 56, size: 22, kind: 'cnnRnnNet' },
-        { x: 56, y: 50, size: 22, kind: 'transformerStack' },
-        { x: 70, y: 60, size: 22, kind: 'trainingFlow' },
-        { x: 82, y: 34, size: 20, kind: 'algorithm' },
+      objects: [
+        { kind: 'neuralNet',        gx: 18, gy: 24, w: 18, h: 16 },
+        { kind: 'cnnRnnNet',        gx: 26, gy: 42, w: 20, h: 18 },
+        { kind: 'transformerStack', gx: 40, gy: 32, w: 18, h: 22 },
+        { kind: 'trainingFlow',     gx: 48, gy: 44, w: 22, h: 16 },
+        { kind: 'algorithmFlow',    gx: 52, gy: 22, w: 16, h: 20 },
       ],
-      connectors: [
-        { from: 0, to: 1 },
-        { from: 1, to: 2 },
-        { from: 2, to: 3 },
-        { from: 3, to: 4 },
+      links: [
+        [0, 1], [1, 2], [2, 3], [2, 4]
       ],
     },
     {
       id: 'datasets',
       name: 'Datasets',
       count: 40,
-      desc: 'Curated, documented, license-checked corpora across text, speech, translation and multimodal data.',
+      desc: 'Curated open corpora across text, speech, translation and multimodal data.',
       items: ['Aina Speech', 'Multilingual MT Set', 'MultiModal Commons', 'Visual Scenes', 'Parallel Corpora'],
-      z: -80,
-      glyphs: [
-        { x: 24, y: 34, size: 22, kind: 'databasePair' },
-        { x: 42, y: 56, size: 22, kind: 'dataLake' },
-        { x: 58, y: 50, size: 22, kind: 'imageTiles' },
-        { x: 70, y: 34, size: 22, kind: 'textDocs' },
-        { x: 82, y: 52, size: 22, kind: 'spreadsheet' },
+      objects: [
+        { kind: 'dbStack',      gx: 16, gy: 28, w: 20, h: 16 },
+        { kind: 'dataLake',     gx: 30, gy: 42, w: 22, h: 16 },
+        { kind: 'imageTiles',   gx: 42, gy: 34, w: 18, h: 18 },
+        { kind: 'textDocs',     gx: 40, gy: 18, w: 20, h: 18 },
+        { kind: 'spreadsheet',  gx: 52, gy: 34, w: 20, h: 16 },
       ],
-      connectors: [
-        { from: 0, to: 1 },
-        { from: 1, to: 2 },
-        { from: 2, to: 3 },
-        { from: 3, to: 4 },
+      links: [
+        [0, 1], [1, 2], [2, 4], [3, 2]
       ],
     },
     {
       id: 'infra',
       name: 'Infrastructure',
       count: 12,
-      desc: 'Public supercomputing capacity — GPU & TPU clusters, storage, and networking run by BSC-CNS.',
+      desc: 'Public supercomputing — GPU & TPU clusters, storage, networking run by BSC-CNS.',
       items: ['MareNostrum 5', 'GPU Nodes', 'TPU Pods', 'Storage', 'Interconnect'],
-      z: -160,
-      glyphs: [
-        { x: 22, y: 44, size: 26, kind: 'serverRacks' },
-        { x: 46, y: 46, size: 24, kind: 'serverNodes' },
-        { x: 72, y: 42, size: 22, kind: 'tpuCard' },
-        { x: 38, y: 74, size: 22, kind: 'cableShort' },
-        { x: 72, y: 70, size: 22, kind: 'cable' },
+      objects: [
+        { kind: 'serverRacks',  gx: 16, gy: 30, w: 22, h: 20 },
+        { kind: 'serverNodes',  gx: 30, gy: 42, w: 20, h: 18 },
+        { kind: 'tpuCard',      gx: 50, gy: 22, w: 22, h: 14 },
+        { kind: 'cableShort',   gx: 36, gy: 18, w: 20, h: 14 },
+        { kind: 'cableLoop',    gx: 54, gy: 40, w: 22, h: 16 },
       ],
-      connectors: [
-        { from: 0, to: 1 },
-        { from: 1, to: 3 },
-        { from: 1, to: 2 },
-        { from: 2, to: 4 },
+      links: [
+        [0, 1], [1, 3], [3, 2], [2, 4]
       ],
     },
   ];
 
-  /* ---------- Build the DOM ---------- */
+  /* ------------------------------------------------------------------
+     SVG BUILDER
+     ------------------------------------------------------------------ */
 
-  function buildStack(host) {
-    host.innerHTML = '';
-    host.classList.add('has-interactive');
-
-    const scene = document.createElement('div');
-    scene.className = 'stack-scene';
-    scene.setAttribute('data-mode', 'stack');
-
-    // Hint text
-    const hint = document.createElement('div');
-    hint.className = 'stack-hint';
-    hint.innerHTML = '<span class="stack-hint-dot"></span> Hover or tap a layer';
-    scene.appendChild(hint);
-
-    // Side-label rails (outside the 3D world so text stays upright)
-    const railL = document.createElement('div');
-    railL.className = 'stack-rail stack-rail-left';
-    const railR = document.createElement('div');
-    railR.className = 'stack-rail stack-rail-right';
-    scene.appendChild(railL);
-    scene.appendChild(railR);
-
-    // 3D world
-    const world = document.createElement('div');
-    world.className = 'stack-world';
-
-    // Layers
-    LAYERS.forEach((layer, layerIdx) => {
-      const el = document.createElement('div');
-      el.className = 'stack-layer';
-      el.dataset.layer = layer.id;
-      el.dataset.state = 'idle';
-      el.style.setProperty('--z', layer.z + 'px');
-
-      // plane
-      const plane = document.createElement('div');
-      plane.className = 'stack-plane';
-      el.appendChild(plane);
-
-      // intra-layer dashed connector arrows (as SVG overlay)
-      if (layer.connectors && layer.connectors.length) {
-        const connSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        connSvg.setAttribute('class', 'stack-connectors');
-        connSvg.setAttribute('viewBox', '0 0 100 100');
-        connSvg.setAttribute('preserveAspectRatio', 'none');
-        layer.connectors.forEach(c => {
-          const a = layer.glyphs[c.from];
-          const b = layer.glyphs[c.to];
-          if (!a || !b) return;
-          const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          // Curve slightly for visual interest
-          const mx = (a.x + b.x) / 2;
-          const my = (a.y + b.y) / 2 - 3;
-          line.setAttribute('d', `M ${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`);
-          line.setAttribute('class', 'conn-path');
-          connSvg.appendChild(line);
-          // arrowhead
-          const dx = b.x - mx, dy = b.y - my;
-          const len = Math.hypot(dx, dy) || 1;
-          const ux = dx / len, uy = dy / len;
-          const ax = b.x - ux * 2.4, ay = b.y - uy * 2.4;
-          const px = -uy, py = ux;
-          const head = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          head.setAttribute('d',
-            `M ${b.x} ${b.y} L ${ax + px * 1.2} ${ay + py * 1.2} L ${ax - px * 1.2} ${ay - py * 1.2} Z`);
-          head.setAttribute('class', 'conn-head');
-          connSvg.appendChild(head);
-        });
-        el.appendChild(connSvg);
-      }
-
-      // glyphs
-      const glyphs = document.createElement('div');
-      glyphs.className = 'stack-glyphs';
-      layer.glyphs.forEach((g, gIdx) => {
-        const gel = document.createElement('div');
-        gel.className = 'glyph';
-        gel.style.left = g.x + '%';
-        gel.style.top = g.y + '%';
-        gel.style.width = (g.size || 22) + '%';
-        gel.style.height = (g.size || 22) + '%';
-        gel.style.marginLeft = '-' + ((g.size || 22) / 2) + '%';
-        gel.style.marginTop = '-' + ((g.size || 22) / 2) + '%';
-        gel.innerHTML = G[g.kind] || '';
-        // gentle stagger for reveal
-        gel.style.setProperty('--glyph-delay', (gIdx * 0.04) + 's');
-        glyphs.appendChild(gel);
-      });
-      el.appendChild(glyphs);
-
-      // count badge (hidden until active)
-      const count = document.createElement('div');
-      count.className = 'stack-count';
-      count.textContent = layer.count + (layer.id === 'infra' ? ' PFLOPS' : '+');
-      el.appendChild(count);
-
-      world.appendChild(el);
-
-      // Side tags in screen space (not 3D) — one on left rail, one on right
-      const tagL = document.createElement('div');
-      tagL.className = 'rail-tag rail-tag-left';
-      tagL.dataset.layer = layer.id;
-      tagL.textContent = layer.name;
-      railL.appendChild(tagL);
-    });
-
-    // Vertical dashed rails connecting all layers (purely decorative, SVG)
-    const railSvgL = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    railSvgL.setAttribute('class', 'rail-svg');
-    railSvgL.setAttribute('viewBox', '0 0 10 100');
-    railSvgL.setAttribute('preserveAspectRatio', 'none');
-    railSvgL.innerHTML = `
-      <path d="M5 6 L5 94" class="rail-line"/>
-      <path d="M5 6 L2 10 M5 6 L8 10" class="rail-arrow"/>
-      <path d="M5 94 L2 90 M5 94 L8 90" class="rail-arrow"/>`;
-    railL.appendChild(railSvgL);
-
-    const railSvgR = railSvgL.cloneNode(true);
-    railR.appendChild(railSvgR);
-
-    scene.appendChild(world);
-
-    host.appendChild(scene);
-    return { scene, world };
+  // Build plane rhombus path for layer index `li`
+  function planePath(li) {
+    const a = iso(0, 0, li);
+    const b = iso(PLANE, 0, li);
+    const c = iso(PLANE, PLANE, li);
+    const d = iso(0, PLANE, li);
+    return `M ${a.x.toFixed(2)} ${a.y.toFixed(2)} L ${b.x.toFixed(2)} ${b.y.toFixed(2)} L ${c.x.toFixed(2)} ${c.y.toFixed(2)} L ${d.x.toFixed(2)} ${d.y.toFixed(2)} Z`;
   }
 
-  /* ---------- Interactions ---------- */
-
-  function wireInteractions({ scene, world }) {
-    const layerEls = scene.querySelectorAll('.stack-layer');
-    const tagEls = scene.querySelectorAll('.rail-tag');
-    let activeId = null;
-    let pinned = false;
-
-    function setState(layerId) {
-      activeId = layerId;
-      if (!layerId) {
-        scene.setAttribute('data-hastooltip', '0');
-        layerEls.forEach(el => (el.dataset.state = 'idle'));
-        tagEls.forEach(t => (t.dataset.state = 'idle'));
-        return;
+  // Build a checkerboard pattern on a plane as a set of tiny diamonds.
+  // Cheaper than a real SVG pattern for this geometry: tile every 4 grid units.
+  function planeCheckerboard(li) {
+    const tile = 4;
+    const parts = [];
+    for (let gx = 0; gx < PLANE; gx += tile) {
+      for (let gy = 0; gy < PLANE; gy += tile) {
+        if (((gx / tile) + (gy / tile)) % 2 !== 0) continue;
+        const p1 = iso(gx, gy, li);
+        const p2 = iso(gx + tile, gy, li);
+        const p3 = iso(gx + tile, gy + tile, li);
+        const p4 = iso(gx, gy + tile, li);
+        parts.push(
+          `M ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} L ${p2.x.toFixed(1)} ${p2.y.toFixed(1)} L ${p3.x.toFixed(1)} ${p3.y.toFixed(1)} L ${p4.x.toFixed(1)} ${p4.y.toFixed(1)} Z`
+        );
       }
-      scene.setAttribute('data-hastooltip', '1');
+    }
+    return parts.join(' ');
+  }
+
+  // Place a symbol on a plane. The symbol is rendered via a nested <svg>
+  // that has its own viewBox, positioned at `iso(gx, gy, li)` (top-left of
+  // the footprint) and scaled so its local viewBox fits into w × h grid units.
+  function placeSymbol(kind, gx, gy, w, h, li) {
+    // Compute screen position of the "footprint center" and the footprint
+    // size in screen units. Use a bounding rectangle in screen space that
+    // spans the four isometric corners of the w×h footprint, so the symbol's
+    // SVG viewBox can fit inside.
+    const ctr = iso(gx, gy, li);
+    const half = iso(w / 2, h / 2, li);
+    const dx = half.x - iso(0, 0, li).x;
+    const dy = half.y - iso(0, 0, li).y;
+    const halfW = Math.abs(w * IX + h * IX) / 2;
+    const halfH = Math.abs((w + h) * IY) / 2;
+    const screenW = halfW * 2;
+    const screenH = halfH * 2 + 40; // extra headroom so tall items aren't clipped
+    const x = ctr.x - screenW / 2;
+    const y = ctr.y - screenH / 2 + dy; // shift so visual center aligns with iso center
+
+    return `<svg x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${screenW.toFixed(1)}" height="${screenH.toFixed(1)}" overflow="visible">
+              <use href="#sym-${kind}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"/>
+            </svg>`;
+  }
+
+  // Draw a dashed arrow between two grid points on the same layer.
+  function gridArrow(gx1, gy1, gx2, gy2, li) {
+    const a = iso(gx1, gy1, li);
+    const b = iso(gx2, gy2, li);
+    // Slight mid-control bend
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2 - 6;
+    // Arrowhead direction at b
+    const dx = b.x - mx, dy = b.y - my;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len;
+    const hx = b.x - ux * 5, hy = b.y - uy * 5;
+    const px = -uy * 3, py = ux * 3;
+    return `
+      <path class="arrow-line" d="M ${a.x.toFixed(1)} ${a.y.toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}"/>
+      <polygon class="arrow-head" points="${b.x.toFixed(1)},${b.y.toFixed(1)} ${(hx + px).toFixed(1)},${(hy + py).toFixed(1)} ${(hx - px).toFixed(1)},${(hy - py).toFixed(1)}"/>`;
+  }
+
+  // Build one layer <g>
+  function buildLayer(layer, li) {
+    // Intra-layer arrows (behind illustrations but above plane)
+    const arrows = layer.links.map(([i, j]) => {
+      const a = layer.objects[i];
+      const b = layer.objects[j];
+      if (!a || !b) return '';
+      return gridArrow(a.gx, a.gy, b.gx, b.gy, li);
+    }).join('');
+
+    // Symbols
+    const objects = layer.objects.map(o =>
+      placeSymbol(o.kind, o.gx - o.w / 2, o.gy - o.h / 2, o.w, o.h, li)
+    ).join('');
+
+    return `
+      <g class="stack-layer" data-layer="${layer.id}">
+        <path class="plane-fill" d="${planePath(li)}"/>
+        <path class="plane-checker" d="${planeCheckerboard(li)}"/>
+        <path class="plane-edge" d="${planePath(li)}"/>
+        <g class="layer-arrows">${arrows}</g>
+        <g class="layer-objects">${objects}</g>
+      </g>`;
+  }
+
+  // Build the side-label pills (at the left tip of each rhombus)
+  function buildLabels() {
+    return LAYERS.map((layer, li) => {
+      const tip = iso(0, PLANE, li); // left (front-left) tip of rhombus
+      const pillX = tip.x - 160;     // to the left of the tip
+      const pillY = tip.y - 16;
+      const pillW = 150;
+      const pillH = 32;
+      return `
+        <g class="side-label" data-layer="${layer.id}">
+          <rect class="pill" x="${pillX}" y="${pillY}" width="${pillW}" height="${pillH}" rx="16"/>
+          <text x="${pillX + pillW / 2}" y="${pillY + pillH / 2 + 4.5}" text-anchor="middle">${layer.name}</text>
+          <!-- dashed leader from pill to tip -->
+          <path class="leader" stroke-dasharray="3 3" d="M ${pillX + pillW + 4} ${pillY + pillH / 2} L ${tip.x - 6} ${tip.y}"/>
+        </g>`;
+    }).join('');
+  }
+
+  // Vertical dashed rails connecting all layers: draw on the extreme left
+  // (front-left tips) and extreme right (front-right tips) of the diagram.
+  function buildVerticalRails() {
+    const leftTop = iso(0, PLANE, 0);
+    const leftBot = iso(0, PLANE, LAYERS.length - 1);
+    const rightTop = iso(PLANE, 0, 0);
+    const rightBot = iso(PLANE, 0, LAYERS.length - 1);
+
+    // Bend the rails away from the diagram slightly so they sit outside the planes
+    const pad = 20;
+    const lx = leftTop.x - pad;
+    const rx = rightTop.x + pad;
+
+    function rail(x, y1, y2) {
+      const arrowSize = 6;
+      return `
+        <path class="vrail-line" stroke-dasharray="4 4" d="M ${x} ${y1 + arrowSize + 4} L ${x} ${y2 - arrowSize - 4}"/>
+        <!-- top arrow pointing up -->
+        <polygon class="vrail-head" points="${x},${y1} ${x - arrowSize},${y1 + arrowSize} ${x + arrowSize},${y1 + arrowSize}"/>
+        <!-- bottom arrow pointing down -->
+        <polygon class="vrail-head" points="${x},${y2} ${x - arrowSize},${y2 - arrowSize} ${x + arrowSize},${y2 - arrowSize}"/>`;
+    }
+    return rail(lx, leftTop.y - 20, leftBot.y + 20) + rail(rx, rightTop.y - 20, rightBot.y + 20);
+  }
+
+  // Build the whole SVG string
+  function buildSVG() {
+    const symbols = Object.values(SYMBOLS).join('');
+    const layers = LAYERS.map(buildLayer).join('');
+    const rails = buildVerticalRails();
+    const labels = buildLabels();
+
+    return `
+      <svg class="stack-svg"
+           viewBox="0 0 ${SCENE_W} ${SCENE_H}"
+           preserveAspectRatio="xMidYMid meet"
+           xmlns="http://www.w3.org/2000/svg">
+        <defs>${symbols}</defs>
+        <g class="rails">${rails}</g>
+        <g class="layers">${layers}</g>
+        <g class="labels">${labels}</g>
+      </svg>`;
+  }
+
+  /* ------------------------------------------------------------------
+     INTERACTIONS
+     ------------------------------------------------------------------ */
+
+  function wire(host) {
+    const scene = host.querySelector('.stack-svg');
+    if (!scene) return;
+
+    const layerEls = scene.querySelectorAll('g.stack-layer');
+    const labelEls = scene.querySelectorAll('g.side-label');
+    let pinned = false;
+    let activeId = null;
+
+    function setActive(id) {
+      activeId = id;
+      host.setAttribute('data-active', id || '');
       layerEls.forEach(el => {
-        el.dataset.state = el.dataset.layer === layerId ? 'active' : 'dim';
+        const on = el.dataset.layer === id;
+        el.classList.toggle('is-active', !!id && on);
+        el.classList.toggle('is-dim', !!id && !on);
       });
-      tagEls.forEach(t => {
-        t.dataset.state = t.dataset.layer === layerId ? 'active' : 'dim';
+      labelEls.forEach(el => {
+        const on = el.dataset.layer === id;
+        el.classList.toggle('is-active', !!id && on);
+        el.classList.toggle('is-dim', !!id && !on);
       });
     }
 
-    function bindHover(el, layerId) {
+    function bind(el, id) {
+      el.style.cursor = 'pointer';
       el.addEventListener('mouseenter', () => {
         if (pinned) return;
-        setState(layerId);
+        setActive(id);
       });
       el.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (pinned && activeId === layerId) {
+        if (pinned && activeId === id) {
           pinned = false;
-          setState(null);
+          setActive(null);
         } else {
           pinned = true;
-          setState(layerId);
+          setActive(id);
         }
       });
     }
 
-    layerEls.forEach(el => bindHover(el, el.dataset.layer));
-    tagEls.forEach(t => bindHover(t, t.dataset.layer));
+    layerEls.forEach(el => bind(el, el.dataset.layer));
+    labelEls.forEach(el => bind(el, el.dataset.layer));
 
     scene.addEventListener('mouseleave', () => {
-      if (!pinned) setState(null);
+      if (!pinned) setActive(null);
     });
-
-    // Click outside the layers (but inside scene) deselects
     scene.addEventListener('click', (e) => {
-      if (e.target.closest('.stack-layer')) return;
-      if (e.target.closest('.rail-tag')) return;
+      if (e.target.closest('g.stack-layer')) return;
+      if (e.target.closest('g.side-label')) return;
       pinned = false;
-      setState(null);
+      setActive(null);
     });
-
-    // Cursor-based parallax tilt
-    let rafId = 0;
-    let targetTiltX = 0, targetTiltY = 0;
-    let curTiltX = 0, curTiltY = 0;
-    scene.addEventListener('mousemove', (e) => {
-      const r = scene.getBoundingClientRect();
-      const nx = (e.clientX - r.left) / r.width - 0.5;
-      const ny = (e.clientY - r.top) / r.height - 0.5;
-      targetTiltY = nx * 4;
-      targetTiltX = -ny * 3;
-      if (!rafId) rafId = requestAnimationFrame(loop);
-    });
-    scene.addEventListener('mouseleave', () => {
-      targetTiltX = 0; targetTiltY = 0;
-      if (!rafId) rafId = requestAnimationFrame(loop);
-    });
-    function loop() {
-      curTiltX += (targetTiltX - curTiltX) * 0.08;
-      curTiltY += (targetTiltY - curTiltY) * 0.08;
-      scene.style.setProperty('--tilt-x', curTiltX.toFixed(2) + 'deg');
-      scene.style.setProperty('--tilt-y', curTiltY.toFixed(2) + 'deg');
-      if (Math.abs(targetTiltX - curTiltX) > 0.05 || Math.abs(targetTiltY - curTiltY) > 0.05) {
-        rafId = requestAnimationFrame(loop);
-      } else {
-        rafId = 0;
-      }
-    }
   }
 
-  /* ---------- Boot ---------- */
+  /* ------------------------------------------------------------------
+     BOOT
+     ------------------------------------------------------------------ */
 
   function boot() {
     const host = document.getElementById('hero-image');
     if (!host) return;
-    const parts = buildStack(host);
-    wireInteractions(parts);
+    host.classList.add('has-interactive');
+    host.innerHTML = buildSVG();
+    wire(host);
   }
 
   if (document.readyState === 'loading') {
