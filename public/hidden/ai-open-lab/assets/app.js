@@ -629,13 +629,6 @@
     // Fade the dark background as user scrolls down
     bg.style.opacity = 1 - progress * 0.7;
 
-    // Shift title color from dark (top cream bg) to light (bottom navy bg)
-    if (title) {
-      const r = Math.round(17 + progress * (255 - 17));
-      const g = Math.round(24 + progress * (255 - 24));
-      const b = Math.round(39 + progress * (255 - 39));
-      title.style.color = `rgb(${r}, ${g}, ${b})`;
-    }
   }
 
   function initJoinParallax() {
