@@ -579,14 +579,13 @@ h1, h2, h3, h4 {
 .feature-card {
   padding: 36px;
   border-radius: var(--radius-lg);
-  background: rgba(255,255,255,0.95);
-  border: 1px solid rgba(255,255,255,0.4);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: all var(--transition-slow);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
 }
 
 .feature-card::before {
@@ -602,8 +601,9 @@ h1, h2, h3, h4 {
 }
 
 .feature-card:hover {
-  box-shadow: var(--shadow-lg);
-  border-color: transparent;
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(63,166,120,0.3);
+  box-shadow: 0 8px 30px rgba(63,166,120,0.1);
   transform: translateY(-4px);
 }
 
@@ -615,7 +615,7 @@ h1, h2, h3, h4 {
   width: 48px;
   height: 48px;
   margin-bottom: 20px;
-  color: var(--primary);
+  color: #fff;
 }
 
 .feature-icon svg {
@@ -626,13 +626,13 @@ h1, h2, h3, h4 {
 .feature-card h3 {
   font-size: 1.2rem;
   margin-bottom: 10px;
-  color: var(--text-900);
+  color: #fff;
 }
 
 .feature-card p {
   font-size: 0.92rem;
   line-height: 1.7;
-  color: var(--text-500);
+  color: var(--text-on-dark-muted);
 }
 
 /* ====== NEWSLETTER ====== */
@@ -753,14 +753,13 @@ h1, h2, h3, h4 {
 .value-card {
   padding: 36px;
   border-radius: var(--radius-lg);
-  background: rgba(255,255,255,0.85);
-  border: 1px solid rgba(0, 26, 71, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: all var(--transition-slow);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 30px rgba(0, 26, 71, 0.08);
 }
 
 .value-card::after {
@@ -776,7 +775,9 @@ h1, h2, h3, h4 {
 }
 
 .value-card:hover {
-  box-shadow: var(--shadow-lg);
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(63,166,120,0.3);
+  box-shadow: 0 8px 30px rgba(63,166,120,0.1);
   transform: translateY(-3px);
 }
 
@@ -787,19 +788,19 @@ h1, h2, h3, h4 {
 .value-number {
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--accent-dark);
+  color: var(--accent);
   margin-bottom: 12px;
 }
 
 .value-card h3 {
   font-size: 1.2rem;
   margin-bottom: 8px;
-  color: var(--text-900);
+  color: #fff;
 }
 
 .value-card p {
   font-size: 0.92rem;
-  color: var(--text-500);
+  color: var(--text-on-dark-muted);
 }
 
 /* ====== TIMELINE — HORIZONTAL PROGRESSIVE REVEAL ====== */
