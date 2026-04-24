@@ -727,7 +727,7 @@ h1, h2, h3, h4 {
 
 .page-subtitle {
   font-size: 1.1rem;
-  color: var(--text-700);
+  color: rgba(255, 255, 255, 0.8);
   max-width: 600px;
   margin: 0 auto;
   position: relative;
@@ -735,7 +735,7 @@ h1, h2, h3, h4 {
 
 .page-hero .hero-eyebrow {
   position: relative;
-  color: var(--accent-dark);
+  color: #fff;
 }
 
 /* ====== INITIATIVE — VALUES ====== */
@@ -1370,7 +1370,7 @@ a.resource-card:hover { color: inherit; }
 }
 
 .join-benefits .section-title {
-  color: var(--primary-dark);
+  color: #fff;
   transition: color 0.3s ease;
 }
 
@@ -1407,12 +1407,22 @@ a.resource-card:hover { color: inherit; }
   transform: translateY(-3px);
 }
 
-.join-number {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--accent);
+.join-icon {
   display: block;
-  margin-bottom: 10px;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 16px;
+  color: var(--accent);
+}
+
+.join-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .join-card h3 {
