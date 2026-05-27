@@ -8,7 +8,7 @@ export function SiteFooter({ items }: SiteFooterProps) {
   const year = new Date().getFullYear();
   const aluraLogoSrc = `${import.meta.env.BASE_URL}images/alura-logo.svg`;
   const whatsappGroupUrl =
-    "https://chat.whatsapp.com/EfVfBSX78VP15KtSkNMbgm?mode=gi_t";
+    "https://chat.whatsapp.com/IAh15OrT2qS3NLyGUWn17P";
 
   return (
     <footer className="site-footer">

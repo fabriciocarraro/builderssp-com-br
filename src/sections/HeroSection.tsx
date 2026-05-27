@@ -20,7 +20,7 @@ export function HeroSection() {
             </a>
             <a
               className="btn btn-primary"
-              href="https://chat.whatsapp.com/EfVfBSX78VP15KtSkNMbgm?mode=gi_t"
+              href="https://chat.whatsapp.com/IAh15OrT2qS3NLyGUWn17P"
               target="_blank"
               rel="noreferrer"
             >
